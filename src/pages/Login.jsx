@@ -65,14 +65,13 @@ const Login = () => {
       >
         <Box
           sx={{
-            bgcolor: "primary.main",
             color: "white",
             p: 2,
             borderRadius: "50%",
             mb: 2,
           }}
         >
-          <LockOutlined />
+          <img className="w-28 h-28" src="/pwa-192x192.png" alt="Logo" />
         </Box>
         <Typography component="h1" variant="h5" sx={{ mb: 3 }}>
           ABIS Doctor-CRM

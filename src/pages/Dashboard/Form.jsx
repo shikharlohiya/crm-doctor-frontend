@@ -433,237 +433,270 @@ const Form = () => {
           </div>
 
           {!formSubmitted ? (
-            <form onSubmit={handleSubmit} className="p-8 space-y-8">
-              {/* Checklist Section */}
-              <section className="space-y-6">
-                <div className="flex items-center space-x-3 mb-6">
-                  <div className="bg-blue-100 rounded-full p-2">
-                    <CheckCircle className="h-6 w-6 text-blue-600" />
+            <form onSubmit={handleSubmit} className="p-4 space-y-6">
+              {locationDetails?.locationName === "HO Visit" ? (
+                // HO Visit - Only show remark field
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-3 mb-6">
+                    <h2 className="text-2xl font-semibold text-gray-800">
+                      HO Visit Remark
+                    </h2>
                   </div>
-                  <h2 className="text-2xl font-semibold text-gray-800">
-                    Task Checklist
-                  </h2>
-                </div>
 
-                {checklistData.length > 0 ? (
-                  <div className="grid md:grid-cols-2 gap-4">
-                    {checklistData.map((item) => (
-                      <div
-                        key={item.id}
-                        className={`border-2 rounded-xl p-4 cursor-pointer transition-all duration-200 ${
-                          selectedChecklistItems.includes(item.id)
-                            ? "border-green-500 bg-green-50 shadow-md transform scale-105"
-                            : "border-gray-200 hover:border-blue-300 hover:shadow-sm"
-                        }`}
-                        onClick={() => handleChecklistSelect(item.id)}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium text-gray-800">
-                            {item.ChecklistTask}
-                          </span>
+                  {/* Remark section */}
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">
+                      Remark
+                    </label>
+                    <textarea
+                      rows={8}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all duration-200 text-sm min-h-24"
+                      placeholder="Enter your observations or notes for this HO visit"
+                      value={remark || ""}
+                      onChange={(e) => setRemark(e.target.value)}
+                    />
+                  </div>
+                </div>
+              ) : (
+                // Farm Visit - Show original content with checklist and support
+                <>
+                  {/* Checklist Section */}
+                  <section className="space-y-6">
+                    <div className="flex items-center space-x-3 mb-6">
+                      <div className="bg-blue-100 rounded-full p-2">
+                        <CheckCircle className="h-6 w-6 text-blue-600" />
+                      </div>
+                      <h2 className="text-2xl font-semibold text-gray-800">
+                        Task Checklist
+                      </h2>
+                    </div>
+
+                    {checklistData.length > 0 ? (
+                      <div className="grid md:grid-cols-2 gap-4">
+                        {checklistData.map((item) => (
                           <div
-                            className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
+                            key={item.id}
+                            className={`border-2 rounded-xl p-4 cursor-pointer transition-all duration-200 ${
                               selectedChecklistItems.includes(item.id)
-                                ? "border-green-500 bg-green-500"
-                                : "border-gray-300"
+                                ? "border-green-500 bg-green-50 shadow-md transform scale-105"
+                                : "border-gray-200 hover:border-blue-300 hover:shadow-sm"
                             }`}
+                            onClick={() => handleChecklistSelect(item.id)}
                           >
-                            {selectedChecklistItems.includes(item.id) && (
-                              <CheckCircle className="h-3 w-3 text-white" />
+                            <div className="flex items-center justify-between">
+                              <span className="font-medium text-gray-800">
+                                {item.ChecklistTask}
+                              </span>
+                              <div
+                                className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
+                                  selectedChecklistItems.includes(item.id)
+                                    ? "border-green-500 bg-green-500"
+                                    : "border-gray-300"
+                                }`}
+                              >
+                                {selectedChecklistItems.includes(item.id) && (
+                                  <CheckCircle className="h-3 w-3 text-white" />
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <AlertCircle className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                        <p>No checklist tasks available</p>
+                      </div>
+                    )}
+                  </section>
+                  {/* Support Section */}
+                  <section className="space-y-6">
+                    <div className="flex items-center space-x-3 mb-6">
+                      <div className="bg-orange-100 rounded-full p-2">
+                        <AlertCircle className="h-6 w-6 text-orange-600" />
+                      </div>
+                      <h2 className="text-2xl font-semibold text-gray-800">
+                        Support
+                      </h2>
+                      <span className="bg-orange-100 text-orange-800 text-sm px-2 py-1 rounded-full">
+                        {Object.keys(groupedSupportData).length} categories
+                      </span>
+                    </div>
+
+                    {Object.keys(groupedSupportData).length > 0 ? (
+                      <div className="space-y-6">
+                        {/* Category Tabs */}
+                        <div className="overflow-x-auto pb-2">
+                          <div className="flex space-x-2 min-w-max">
+                            {Object.entries(groupedSupportData).map(
+                              ([categoryName, subcategories]) => (
+                                <button
+                                  key={categoryName}
+                                  type="button"
+                                  onClick={() =>
+                                    setActiveCategory(categoryName)
+                                  }
+                                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+                                    activeCategory === categoryName
+                                      ? "bg-blue-500 text-white shadow-md transform scale-105"
+                                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                  }`}
+                                >
+                                  {categoryName} ({subcategories.length})
+                                </button>
+                              )
                             )}
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <AlertCircle className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                    <p>No checklist tasks available</p>
-                  </div>
-                )}
-              </section>
-              {/* Support Section */}
-              <section className="space-y-6">
-                <div className="flex items-center space-x-3 mb-6">
-                  <div className="bg-orange-100 rounded-full p-2">
-                    <AlertCircle className="h-6 w-6 text-orange-600" />
-                  </div>
-                  <h2 className="text-2xl font-semibold text-gray-800">
-                    Support
-                  </h2>
-                  <span className="bg-orange-100 text-orange-800 text-sm px-2 py-1 rounded-full">
-                    {Object.keys(groupedSupportData).length} categories
-                  </span>
-                </div>
 
-                {Object.keys(groupedSupportData).length > 0 ? (
-                  <div className="space-y-6">
-                    {/* Category Tabs */}
-                    <div className="overflow-x-auto pb-2">
-                      <div className="flex space-x-2 min-w-max">
-                        {Object.entries(groupedSupportData).map(
-                          ([categoryName, subcategories]) => (
-                            <button
-                              key={categoryName}
-                              type="button"
-                              onClick={() => setActiveCategory(categoryName)}
-                              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap ${
-                                activeCategory === categoryName
-                                  ? "bg-blue-500 text-white shadow-md transform scale-105"
-                                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                              }`}
-                            >
-                              {categoryName} ({subcategories.length})
-                            </button>
-                          )
-                        )}
-                      </div>
-                    </div>
+                        {/* Subcategories for Active Category */}
+                        {activeCategory &&
+                          groupedSupportData[activeCategory] && (
+                            <div className="space-y-6">
+                              {groupedSupportData[activeCategory].map(
+                                (subcategory) => (
+                                  <div
+                                    key={subcategory.id}
+                                    className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 w-full"
+                                  >
+                                    <h4 className="text-lg font-medium text-gray-800 mb-4">
+                                      {subcategory.SubCategoryName}
+                                    </h4>
 
-                    {/* Subcategories for Active Category */}
-                    {activeCategory && groupedSupportData[activeCategory] && (
-                      <div className="space-y-6">
-                        {groupedSupportData[activeCategory].map(
-                          (subcategory) => (
-                            <div
-                              key={subcategory.id}
-                              className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 w-full"
-                            >
-                              <h4 className="text-lg font-medium text-gray-800 mb-4">
-                                {subcategory.SubCategoryName}
-                              </h4>
+                                    <div className="space-y-4">
+                                      {/* Image Upload */}
+                                      <div className="space-y-2">
+                                        <label className="block text-sm font-medium text-gray-700">
+                                          Upload Image
+                                        </label>
 
-                              <div className="space-y-4">
-                                {/* Image Upload */}
-                                <div className="space-y-2">
-                                  <label className="block text-sm font-medium text-gray-700">
-                                    Upload Image
-                                  </label>
+                                        <div className="flex items-center space-x-3">
+                                          {images[subcategory.id] ? (
+                                            <div className="relative">
+                                              <img
+                                                src={
+                                                  images[subcategory.id].preview
+                                                }
+                                                alt="Preview"
+                                                className="w-16 h-16 object-cover rounded-lg border-2 border-gray-300"
+                                              />
+                                              <button
+                                                type="button"
+                                                onClick={() =>
+                                                  removeImage(subcategory.id)
+                                                }
+                                                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors shadow-lg"
+                                              >
+                                                <X className="h-3 w-3" />
+                                              </button>
+                                            </div>
+                                          ) : (
+                                            <div className="w-16 h-16 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center hover:border-blue-400 transition-colors">
+                                              <input
+                                                type="file"
+                                                accept="image/*"
+                                                onChange={(e) =>
+                                                  handleImageUpload(
+                                                    subcategory.id,
+                                                    e.target.files[0]
+                                                  )
+                                                }
+                                                className="hidden"
+                                                id={`image-${subcategory.id}`}
+                                              />
+                                              <label
+                                                htmlFor={`image-${subcategory.id}`}
+                                                className="cursor-pointer"
+                                              >
+                                                <Camera className="h-6 w-6 text-gray-400 hover:text-blue-500 transition-colors" />
+                                              </label>
+                                            </div>
+                                          )}
 
-                                  <div className="flex items-center space-x-3">
-                                    {images[subcategory.id] ? (
-                                      <div className="relative">
-                                        <img
-                                          src={images[subcategory.id].preview}
-                                          alt="Preview"
-                                          className="w-16 h-16 object-cover rounded-lg border-2 border-gray-300"
-                                        />
-                                        <button
-                                          type="button"
-                                          onClick={() =>
-                                            removeImage(subcategory.id)
-                                          }
-                                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors shadow-lg"
-                                        >
-                                          <X className="h-3 w-3" />
-                                        </button>
+                                          <div className="flex-1">
+                                            <input
+                                              type="file"
+                                              accept="image/*"
+                                              onChange={(e) =>
+                                                handleImageUpload(
+                                                  subcategory.id,
+                                                  e.target.files[0]
+                                                )
+                                              }
+                                              className="hidden"
+                                              id={`image-btn-${subcategory.id}`}
+                                            />
+                                            <label
+                                              htmlFor={`image-btn-${subcategory.id}`}
+                                              className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer transition-colors"
+                                            >
+                                              <Upload className="h-4 w-4 mr-2" />
+                                              {images[subcategory.id]
+                                                ? "Change Image"
+                                                : "Select Image"}
+                                            </label>
+                                          </div>
+                                        </div>
+
+                                        {images[subcategory.id] && (
+                                          <p className="text-xs text-gray-500 break-words">
+                                            {images[subcategory.id].file.name}
+                                          </p>
+                                        )}
                                       </div>
-                                    ) : (
-                                      <div className="w-16 h-16 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center hover:border-blue-400 transition-colors">
-                                        <input
-                                          type="file"
-                                          accept="image/*"
+
+                                      {/* Observation Field */}
+                                      <div className="space-y-2">
+                                        <label className="block text-sm font-medium text-gray-700">
+                                          Observation
+                                        </label>
+                                        <textarea
+                                          rows={4}
+                                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all duration-200 text-sm min-h-24"
+                                          placeholder={`Enter observations for ${subcategory.SubCategoryName}...`}
+                                          value={
+                                            supportFormData[subcategory.id]
+                                              ?.observation || ""
+                                          }
                                           onChange={(e) =>
-                                            handleImageUpload(
+                                            handleSupportFormChange(
                                               subcategory.id,
-                                              e.target.files[0]
+                                              "observation",
+                                              e.target.value
                                             )
                                           }
-                                          className="hidden"
-                                          id={`image-${subcategory.id}`}
                                         />
-                                        <label
-                                          htmlFor={`image-${subcategory.id}`}
-                                          className="cursor-pointer"
-                                        >
-                                          <Camera className="h-6 w-6 text-gray-400 hover:text-blue-500 transition-colors" />
-                                        </label>
                                       </div>
-                                    )}
-
-                                    <div className="flex-1">
-                                      <input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={(e) =>
-                                          handleImageUpload(
-                                            subcategory.id,
-                                            e.target.files[0]
-                                          )
-                                        }
-                                        className="hidden"
-                                        id={`image-btn-${subcategory.id}`}
-                                      />
-                                      <label
-                                        htmlFor={`image-btn-${subcategory.id}`}
-                                        className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer transition-colors"
-                                      >
-                                        <Upload className="h-4 w-4 mr-2" />
-                                        {images[subcategory.id]
-                                          ? "Change Image"
-                                          : "Select Image"}
-                                      </label>
                                     </div>
                                   </div>
-
-                                  {images[subcategory.id] && (
-                                    <p className="text-xs text-gray-500 break-words">
-                                      {images[subcategory.id].file.name}
-                                    </p>
-                                  )}
-                                </div>
-
-                                {/* Observation Field */}
-                                <div className="space-y-2">
-                                  <label className="block text-sm font-medium text-gray-700">
-                                    Observation
-                                  </label>
-                                  <textarea
-                                    rows={4}
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all duration-200 text-sm min-h-24"
-                                    placeholder={`Enter observations for ${subcategory.SubCategoryName}...`}
-                                    value={
-                                      supportFormData[subcategory.id]
-                                        ?.observation || ""
-                                    }
-                                    onChange={(e) =>
-                                      handleSupportFormChange(
-                                        subcategory.id,
-                                        "observation",
-                                        e.target.value
-                                      )
-                                    }
-                                  />
-                                </div>
-                              </div>
+                                )
+                              )}
                             </div>
-                          )
-                        )}
+                          )}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-gray-500">
+                        <AlertCircle className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                        <p>No support categories available</p>
                       </div>
                     )}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <AlertCircle className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                    <p>No support categories available</p>
-                  </div>
-                )}
-              </section>
+                  </section>
 
-              {/* Remark section */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Remark
-                </label>
-                <textarea
-                  rows={4}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all duration-200 text-sm min-h-24"
-                  placeholder={`Enter remark`}
-                  value={remark || ""}
-                  onChange={(e) => setRemark(e.target.value)}
-                />
-              </div>
+                  {/* Remark section */}
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">
+                      Remark
+                    </label>
+                    <textarea
+                      rows={4}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all duration-200 text-sm min-h-24"
+                      placeholder={`Enter remark`}
+                      value={remark || ""}
+                      onChange={(e) => setRemark(e.target.value)}
+                    />
+                  </div>
+                </>
+              )}
               {/* Submit/Checkout Section */}
               <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 -mx-4">
                 <button
