@@ -26,6 +26,11 @@ const theme = createTheme({
   },
 });
 
+// Import service worker registration
+import { registerSW } from "virtual:pwa-register";
+
+registerSW(); // This will auto-update the service worker
+
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <Provider store={store}>
