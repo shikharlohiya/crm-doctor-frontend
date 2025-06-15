@@ -14,7 +14,7 @@ import {
   Activity,
 } from "lucide-react";
 
-const TravelHistory = ({ user, onBack, onLogout }) => {
+const TravelHistory = ({ user, onBack }) => {
   const [travels, setTravels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -121,6 +121,7 @@ const TravelHistory = ({ user, onBack, onLogout }) => {
       </div>
     );
   }
+  console.log(travels);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
@@ -140,12 +141,6 @@ const TravelHistory = ({ user, onBack, onLogout }) => {
                 className="text-blue-100 hover:text-white text-sm transition-colors mb-1 block"
               >
                 ← Back
-              </button>
-              <button
-                onClick={onLogout}
-                className="text-blue-100 hover:text-white text-xs transition-colors"
-              >
-                Logout
               </button>
             </div>
           </div>
@@ -187,6 +182,7 @@ const TravelHistory = ({ user, onBack, onLogout }) => {
                       <div className="bg-blue-100 rounded-full p-2">
                         <MapPin className="h-4 w-4 text-blue-600" />
                       </div>
+
                       <div>
                         <p className="font-semibold text-gray-800">
                           Travel #{travel.id}

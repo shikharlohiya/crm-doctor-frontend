@@ -11,16 +11,18 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import axiosInstance from "../../library/axios";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
+import { setFormStatus } from "../../redux/slices/sessionSlice";
 import toast from "react-hot-toast";
 
-const Form = ({ onBack, onLogout }) => {
+const Form = () => {
   const [checklistData, setChecklistData] = useState([]);
   const [supportData, setSupportData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeCategory, setActiveCategory] = useState("");
+  const [formSubmitted, setFormSubmitted] = useState(false);
 
   // Form state
   const [selectedChecklistItems, setSelectedChecklistItems] = useState([]);
@@ -32,8 +34,16 @@ const Form = ({ onBack, onLogout }) => {
 
   const user = useSelector((state) => state.user.user);
   const employeeId = user.EmployeeId;
+  const formStatus = useSelector((state) => state.session.formStatus);
+  const sessionStatus = useSelector((state) => state.session.sessionStatus);
+  const locationDetails = useSelector((state) => state.session.locationDetails);
+  const farmDetails = useSelector((state) => state.session.farmDetails);
+  console.log(sessionStatus, locationDetails, farmDetails);
+
+  console.log(formStatus);
 
   const location = useLocation();
+  const dispatch = useDispatch();
   const { activeTravel, selectedLocation } = location.state || {};
 
   const navigate = useNavigate();
@@ -82,6 +92,12 @@ const Form = ({ onBack, onLogout }) => {
     };
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (formStatus === "submitted") {
+      setFormSubmitted(true);
+    }
+  }, [formStatus]);
 
   // Group support data by category with proper error handling
   const groupedSupportData = supportData.reduce((acc, item) => {
@@ -172,9 +188,10 @@ const Form = ({ onBack, onLogout }) => {
 
       if (result.success) {
         console.log("Checkout response:", result);
-        alert("Checkout successful!");
+        toast.success("Checkout successful!");
+        navigate("/dashboard");
         // Call the parent function to show travel history
-        onBack("showTravelHistory"); // Pass a parameter to indicate we want travel history
+        // Pass a parameter to indicate we want travel history
       } else {
         throw new Error(result.message || "Checkout failed");
       }
@@ -250,7 +267,7 @@ const Form = ({ onBack, onLogout }) => {
       formData.append("FarmId", selectedLocation?.farmData?.FarmId || 1);
       formData.append(
         "remark",
-        `Visit completed by ${user?.username}. Checklist items: ${selectedChecklistItems.length} completed.`
+        `Visit completed by ${user?.EmployeeName}. Checklist items: ${selectedChecklistItems.length} completed.`
       );
 
       // Prepare category details array
@@ -307,7 +324,7 @@ const Form = ({ onBack, onLogout }) => {
         if (result.data && result.data.formDetailId) {
           setFormDetailId(result.data.formDetailId);
         }
-
+        dispatch(setFormStatus("submitted"));
         toast.success("Visit report submitted successfully!");
         navigate("/dashboard/checkin");
         setShowCheckout(true); // Show checkout button after successful submission
@@ -320,17 +337,6 @@ const Form = ({ onBack, onLogout }) => {
     } finally {
       setSubmitting(false);
     }
-  };
-
-  // Format date for display
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleString("en-IN", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
   };
 
   if (loading) {
@@ -380,16 +386,10 @@ const Form = ({ onBack, onLogout }) => {
               </div>
               <div className="text-right">
                 <button
-                  onClick={onBack}
+                  onClick={() => navigate("/dashboard")}
                   className="text-blue-100 hover:text-white text-sm transition-colors mb-1 block"
                 >
-                  ← Back
-                </button>
-                <button
-                  onClick={onLogout}
-                  className="text-blue-100 hover:text-white text-xs transition-colors"
-                >
-                  Logout
+                  Back
                 </button>
               </div>
             </div>
@@ -403,9 +403,8 @@ const Form = ({ onBack, onLogout }) => {
                 <div>
                   <p className="text-gray-600">Location</p>
                   <p className="font-medium text-gray-900 text-xs">
-                    {selectedLocation?.locationType}
-                    {selectedLocation?.farmData &&
-                      ` - ${selectedLocation.farmData.farm.FarmName}`}
+                    {locationDetails ? locationDetails.locationName : "N/A"}
+                    {farmDetails && ` - ${farmDetails.farmName}`}
                   </p>
                 </div>
               </div>
@@ -414,7 +413,7 @@ const Form = ({ onBack, onLogout }) => {
                 <div>
                   <p className="text-gray-600">Doctor</p>
                   <p className="font-medium text-gray-900 text-xs">
-                    {user?.username}
+                    {user?.EmployeeName}
                   </p>
                 </div>
               </div>
@@ -423,244 +422,264 @@ const Form = ({ onBack, onLogout }) => {
                 <div>
                   <p className="text-gray-600">Check-in</p>
                   <p className="font-medium text-gray-900 text-xs">
-                    {activeTravel
-                      ? formatDate(activeTravel.checkinTime)
-                      : "N/A"}
+                    {sessionStatus === "checked_in" ? "Checked In" : "N/A"}
                   </p>
                 </div>
               </div>
               <div className="flex items-center">
                 <CheckCircle className="h-3 w-3 text-purple-600 mr-1" />
                 <div>
-                  <p className="text-gray-600">Travel ID</p>
+                  <p className="text-gray-600">Form Status</p>
                   <p className="font-medium text-gray-900 text-xs">
-                    #{activeTravel?.id || "N/A"}
+                    {formStatus}
                   </p>
                 </div>
               </div>
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-8 space-y-8">
-            {/* Checklist Section */}
-            <section className="space-y-6">
-              <div className="flex items-center space-x-3 mb-6">
-                <div className="bg-blue-100 rounded-full p-2">
-                  <CheckCircle className="h-6 w-6 text-blue-600" />
+          {!formSubmitted ? (
+            <form onSubmit={handleSubmit} className="p-8 space-y-8">
+              {/* Checklist Section */}
+              <section className="space-y-6">
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="bg-blue-100 rounded-full p-2">
+                    <CheckCircle className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <h2 className="text-2xl font-semibold text-gray-800">
+                    Task Checklist
+                  </h2>
                 </div>
-                <h2 className="text-2xl font-semibold text-gray-800">
-                  Top Pointers
-                </h2>
-              </div>
 
-              {checklistData.length > 0 ? (
-                <div className="grid md:grid-cols-2 gap-4">
-                  {checklistData.map((item) => (
-                    <div
-                      key={item.id}
-                      className={`border-2 rounded-xl p-4 cursor-pointer transition-all duration-200 ${
-                        selectedChecklistItems.includes(item.id)
-                          ? "border-green-500 bg-green-50 shadow-md transform scale-105"
-                          : "border-gray-200 hover:border-blue-300 hover:shadow-sm"
-                      }`}
-                      onClick={() => handleChecklistSelect(item.id)}
-                    >
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium text-gray-800">
-                          {item.ChecklistTask}
-                        </span>
-                        <div
-                          className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
-                            selectedChecklistItems.includes(item.id)
-                              ? "border-green-500 bg-green-500"
-                              : "border-gray-300"
-                          }`}
-                        >
-                          {selectedChecklistItems.includes(item.id) && (
-                            <CheckCircle className="h-3 w-3 text-white" />
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <AlertCircle className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                  <p>No checklist tasks available</p>
-                </div>
-              )}
-            </section>
-
-            {/* Support Section */}
-            <section className="space-y-6">
-              <div className="flex items-center space-x-3 mb-6">
-                <div className="bg-orange-100 rounded-full p-2">
-                  <AlertCircle className="h-6 w-6 text-orange-600" />
-                </div>
-                <h2 className="text-2xl font-semibold text-gray-800">
-                  Support
-                </h2>
-                {/* <span className="bg-orange-100 text-orange-800 text-sm px-2 py-1 rounded-full">
-                  {Object.keys(groupedSupportData).length} categories
-                </span> */}
-              </div>
-
-              {Object.keys(groupedSupportData).length > 0 ? (
-                <div className="space-y-6">
-                  {/* Category Tabs */}
-                  <div className="overflow-x-auto pb-2">
-                    <div className="flex space-x-2 min-w-max">
-                      {Object.entries(groupedSupportData).map(
-                        ([categoryName, subcategories]) => (
-                          <button
-                            key={categoryName}
-                            type="button"
-                            onClick={() => setActiveCategory(categoryName)}
-                            className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap ${
-                              activeCategory === categoryName
-                                ? "bg-blue-500 text-white shadow-md transform scale-105"
-                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                {checklistData.length > 0 ? (
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {checklistData.map((item) => (
+                      <div
+                        key={item.id}
+                        className={`border-2 rounded-xl p-4 cursor-pointer transition-all duration-200 ${
+                          selectedChecklistItems.includes(item.id)
+                            ? "border-green-500 bg-green-50 shadow-md transform scale-105"
+                            : "border-gray-200 hover:border-blue-300 hover:shadow-sm"
+                        }`}
+                        onClick={() => handleChecklistSelect(item.id)}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium text-gray-800">
+                            {item.ChecklistTask}
+                          </span>
+                          <div
+                            className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
+                              selectedChecklistItems.includes(item.id)
+                                ? "border-green-500 bg-green-500"
+                                : "border-gray-300"
                             }`}
                           >
-                            {categoryName} ({subcategories.length})
-                          </button>
-                        )
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Subcategories for Active Category */}
-                  {activeCategory && groupedSupportData[activeCategory] && (
-                    <div className="space-y-6">
-                      {groupedSupportData[activeCategory].map((subcategory) => (
-                        <div
-                          key={subcategory.id}
-                          className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 w-full"
-                        >
-                          <h4 className="text-lg font-medium text-gray-800 mb-4">
-                            {subcategory.SubCategoryName}
-                          </h4>
-
-                          <div className="space-y-4">
-                            {/* Image Upload */}
-                            <div className="space-y-2">
-                              <label className="block text-sm font-medium text-gray-700">
-                                Upload Image
-                              </label>
-
-                              <div className="flex items-center space-x-3">
-                                {images[subcategory.id] ? (
-                                  <div className="relative">
-                                    <img
-                                      src={images[subcategory.id].preview}
-                                      alt="Preview"
-                                      className="w-16 h-16 object-cover rounded-lg border-2 border-gray-300"
-                                    />
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        removeImage(subcategory.id)
-                                      }
-                                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors shadow-lg"
-                                    >
-                                      <X className="h-3 w-3" />
-                                    </button>
-                                  </div>
-                                ) : (
-                                  <div className="w-16 h-16 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center hover:border-blue-400 transition-colors">
-                                    <input
-                                      type="file"
-                                      accept="image/*"
-                                      onChange={(e) =>
-                                        handleImageUpload(
-                                          subcategory.id,
-                                          e.target.files[0]
-                                        )
-                                      }
-                                      className="hidden"
-                                      id={`image-${subcategory.id}`}
-                                    />
-                                    <label
-                                      htmlFor={`image-${subcategory.id}`}
-                                      className="cursor-pointer"
-                                    >
-                                      <Camera className="h-6 w-6 text-gray-400 hover:text-blue-500 transition-colors" />
-                                    </label>
-                                  </div>
-                                )}
-
-                                <div className="flex-1">
-                                  <input
-                                    type="file"
-                                    accept="image/*"
-                                    onChange={(e) =>
-                                      handleImageUpload(
-                                        subcategory.id,
-                                        e.target.files[0]
-                                      )
-                                    }
-                                    className="hidden"
-                                    id={`image-btn-${subcategory.id}`}
-                                  />
-                                  <label
-                                    htmlFor={`image-btn-${subcategory.id}`}
-                                    className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer transition-colors"
-                                  >
-                                    <Upload className="h-4 w-4 mr-2" />
-                                    {images[subcategory.id]
-                                      ? "Change Image"
-                                      : "Select Image"}
-                                  </label>
-                                </div>
-                              </div>
-
-                              {images[subcategory.id] && (
-                                <p className="text-xs text-gray-500 break-words">
-                                  {images[subcategory.id].file.name}
-                                </p>
-                              )}
-                            </div>
-
-                            {/* Observation Field */}
-                            <div className="space-y-2">
-                              <label className="block text-sm font-medium text-gray-700">
-                                Observation
-                              </label>
-                              <textarea
-                                rows={4}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all duration-200 text-sm min-h-24"
-                                placeholder={`Enter observations for ${subcategory.SubCategoryName}...`}
-                                value={
-                                  supportFormData[subcategory.id]
-                                    ?.observation || ""
-                                }
-                                onChange={(e) =>
-                                  handleSupportFormChange(
-                                    subcategory.id,
-                                    "observation",
-                                    e.target.value
-                                  )
-                                }
-                              />
-                            </div>
+                            {selectedChecklistItems.includes(item.id) && (
+                              <CheckCircle className="h-3 w-3 text-white" />
+                            )}
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <AlertCircle className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                    <p>No checklist tasks available</p>
+                  </div>
+                )}
+              </section>
+              {/* Support Section */}
+              <section className="space-y-6">
+                <div className="flex items-center space-x-3 mb-6">
+                  <div className="bg-orange-100 rounded-full p-2">
+                    <AlertCircle className="h-6 w-6 text-orange-600" />
+                  </div>
+                  <h2 className="text-2xl font-semibold text-gray-800">
+                    Support
+                  </h2>
+                  {/* <span className="bg-orange-100 text-orange-800 text-sm px-2 py-1 rounded-full">
+                  {Object.keys(groupedSupportData).length} categories
+                </span> */}
                 </div>
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <AlertCircle className="h-12 w-12 mx-auto mb-4 text-gray-400" />
-                  <p>No support categories available</p>
-                </div>
-              )}
-            </section>
 
-            {/* Submit/Checkout Section */}
-            {!showCheckout ? (
-              /* Submit Button */
+                {Object.keys(groupedSupportData).length > 0 ? (
+                  <div className="space-y-6">
+                    {/* Category Tabs */}
+                    <div className="overflow-x-auto pb-2">
+                      <div className="flex space-x-2 min-w-max">
+                        {Object.entries(groupedSupportData).map(
+                          ([categoryName, subcategories]) => (
+                            <button
+                              key={categoryName}
+                              type="button"
+                              onClick={() => setActiveCategory(categoryName)}
+                              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+                                activeCategory === categoryName
+                                  ? "bg-blue-500 text-white shadow-md transform scale-105"
+                                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                              }`}
+                            >
+                              {categoryName} ({subcategories.length})
+                            </button>
+                          )
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Subcategories for Active Category */}
+                    {activeCategory && groupedSupportData[activeCategory] && (
+                      <div className="space-y-6">
+                        {groupedSupportData[activeCategory].map(
+                          (subcategory) => (
+                            <div
+                              key={subcategory.id}
+                              className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6 w-full"
+                            >
+                              <h4 className="text-lg font-medium text-gray-800 mb-4">
+                                {subcategory.SubCategoryName}
+                              </h4>
+
+                              <div className="space-y-4">
+                                {/* Image Upload */}
+                                <div className="space-y-2">
+                                  <label className="block text-sm font-medium text-gray-700">
+                                    Upload Image
+                                  </label>
+
+                                  <div className="flex items-center space-x-3">
+                                    {images[subcategory.id] ? (
+                                      <div className="relative">
+                                        <img
+                                          src={images[subcategory.id].preview}
+                                          alt="Preview"
+                                          className="w-16 h-16 object-cover rounded-lg border-2 border-gray-300"
+                                        />
+                                        <button
+                                          type="button"
+                                          onClick={() =>
+                                            removeImage(subcategory.id)
+                                          }
+                                          className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors shadow-lg"
+                                        >
+                                          <X className="h-3 w-3" />
+                                        </button>
+                                      </div>
+                                    ) : (
+                                      <div className="w-16 h-16 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center hover:border-blue-400 transition-colors">
+                                        <input
+                                          type="file"
+                                          accept="image/*"
+                                          onChange={(e) =>
+                                            handleImageUpload(
+                                              subcategory.id,
+                                              e.target.files[0]
+                                            )
+                                          }
+                                          className="hidden"
+                                          id={`image-${subcategory.id}`}
+                                        />
+                                        <label
+                                          htmlFor={`image-${subcategory.id}`}
+                                          className="cursor-pointer"
+                                        >
+                                          <Camera className="h-6 w-6 text-gray-400 hover:text-blue-500 transition-colors" />
+                                        </label>
+                                      </div>
+                                    )}
+
+                                    <div className="flex-1">
+                                      <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) =>
+                                          handleImageUpload(
+                                            subcategory.id,
+                                            e.target.files[0]
+                                          )
+                                        }
+                                        className="hidden"
+                                        id={`image-btn-${subcategory.id}`}
+                                      />
+                                      <label
+                                        htmlFor={`image-btn-${subcategory.id}`}
+                                        className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer transition-colors"
+                                      >
+                                        <Upload className="h-4 w-4 mr-2" />
+                                        {images[subcategory.id]
+                                          ? "Change Image"
+                                          : "Select Image"}
+                                      </label>
+                                    </div>
+                                  </div>
+
+                                  {images[subcategory.id] && (
+                                    <p className="text-xs text-gray-500 break-words">
+                                      {images[subcategory.id].file.name}
+                                    </p>
+                                  )}
+                                </div>
+
+                                {/* Observation Field */}
+                                <div className="space-y-2">
+                                  <label className="block text-sm font-medium text-gray-700">
+                                    Observation
+                                  </label>
+                                  <textarea
+                                    rows={4}
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all duration-200 text-sm min-h-24"
+                                    placeholder={`Enter observations for ${subcategory.SubCategoryName}...`}
+                                    value={
+                                      supportFormData[subcategory.id]
+                                        ?.observation || ""
+                                    }
+                                    onChange={(e) =>
+                                      handleSupportFormChange(
+                                        subcategory.id,
+                                        "observation",
+                                        e.target.value
+                                      )
+                                    }
+                                  />
+                                </div>
+                                {/* Status Dropdown */}
+                                <div className="space-y-2">
+                                  <label className="block text-sm font-medium text-gray-700">
+                                    Status
+                                  </label>
+                                  <select
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                                    value={
+                                      supportFormData[subcategory.id]?.status ||
+                                      "pending"
+                                    }
+                                    onChange={(e) =>
+                                      handleSupportFormChange(
+                                        subcategory.id,
+                                        "status",
+                                        e.target.value
+                                      )
+                                    }
+                                  >
+                                    <option value="pending">Pending</option>
+                                    <option value="completed">Completed</option>
+                                  </select>
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <AlertCircle className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                    <p>No support categories available</p>
+                  </div>
+                )}
+              </section>
+              {/* Submit/Checkout Section */}
               <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 -mx-4">
                 <button
                   type="submit"
@@ -688,49 +707,48 @@ const Form = ({ onBack, onLogout }) => {
                   )}
                 </button>
               </div>
-            ) : (
-              /* Checkout Section */
-              <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 -mx-4">
-                <div className="space-y-3">
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
-                    <CheckCircle className="h-6 w-6 text-green-600 mx-auto mb-2" />
-                    <p className="text-green-800 font-medium text-sm">
-                      Form submitted successfully!
-                    </p>
-                    <p className="text-green-600 text-xs">
-                      You can now checkout from this location
-                    </p>
-                  </div>
+            </form>
+          ) : (
+            <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 -mx-4">
+              <div className="space-y-3">
+                <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-center">
+                  <CheckCircle className="h-6 w-6 text-green-600 mx-auto mb-2" />
+                  <p className="text-green-800 font-medium text-sm">
+                    Form submitted successfully!
+                  </p>
+                  <p className="text-green-600 text-xs">
+                    You can now checkout from this location
+                  </p>
+                </div>
 
-                  <div className="flex space-x-3">
-                    <button
-                      type="button"
-                      onClick={onBack}
-                      className="flex-1 bg-gray-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-600 transition-colors"
-                    >
-                      Back
-                    </button>
+                <div className="flex space-x-3">
+                  <button
+                    type="button"
+                    onClick={() => navigate("/dashboard/checkin")}
+                    className="flex-1 bg-gray-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-600 transition-colors"
+                  >
+                    Back
+                  </button>
 
-                    <button
-                      type="button"
-                      onClick={handleCheckout}
-                      disabled={submitting}
-                      className="flex-1 bg-gradient-to-r from-orange-500 to-red-600 text-white py-3 px-4 rounded-lg font-medium hover:from-orange-600 hover:to-red-700 transition-all disabled:opacity-50"
-                    >
-                      {submitting ? (
-                        <div className="flex items-center justify-center">
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-1"></div>
-                          Checking out...
-                        </div>
-                      ) : (
-                        "Checkout"
-                      )}
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={handleCheckout}
+                    disabled={submitting}
+                    className="flex-1 bg-gradient-to-r from-orange-500 to-red-600 text-white py-3 px-4 rounded-lg font-medium hover:from-orange-600 hover:to-red-700 transition-all disabled:opacity-50"
+                  >
+                    {submitting ? (
+                      <div className="flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-1"></div>
+                        Checking out...
+                      </div>
+                    ) : (
+                      "Checkout"
+                    )}
+                  </button>
                 </div>
               </div>
-            )}
-          </form>
+            </div>
+          )}
         </div>
       </div>
     </div>

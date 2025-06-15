@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import axiosInstance from "../../library/axios";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { setLocation, setFarm } from "../../redux/slices/sessionSlice";
 
 const LocationSelector = () => {
   const [locations, setLocations] = useState([]);
@@ -18,8 +19,29 @@ const LocationSelector = () => {
     fetchLocations();
   }, []);
 
-  const { user } = useSelector((state) => state.user);
+  const user = useSelector((state) => state.user.user);
   const employeeId = user.EmployeeId;
+  const locationDetails = useSelector((state) => state.session.locationDetails);
+  const farmDetails = useSelector((state) => state.session.farmDetails);
+  const sessionStatus = useSelector((state) => state.session.sessionStatus);
+  console.log(locationDetails, farmDetails, sessionStatus);
+
+  const dispatch = useDispatch();
+
+  // useEffect(() => {
+  //   if (locationDetails) {
+  //     if (locationDetails.locationName === "Farm Visit") {
+  //       // Only navigate if farm details exist
+  //       if (farmDetails) {
+  //         navigate("/dashboard/checkin");
+  //       }
+  //       // Otherwise stay on this page to select a farm
+  //     } else {
+  //       // For non-farm visits, navigate directly
+  //       navigate("/dashboard/checkin");
+  //     }
+  //   }
+  // }, [locationDetails, farmDetails, navigate]);
 
   const fetchLocations = async () => {
     try {
@@ -61,6 +83,12 @@ const LocationSelector = () => {
   };
 
   const handleLocationSelect = (location) => {
+    dispatch(
+      setLocation({
+        locationId: location.LocationId,
+        locationName: location.LocationName,
+      })
+    );
     setSelectedLocation(location);
     if (location.LocationName === "Farm Visit") {
       fetchFarms();
@@ -68,13 +96,17 @@ const LocationSelector = () => {
   };
 
   const handleFarmSelect = (farmData) => {
-    navigate("/dashboard/checkin", {
-      state: { farmData },
-    });
+    dispatch(
+      setFarm({
+        farmId: farmData.FarmId,
+        farmName: farmData.farm.FarmName,
+      })
+    );
+    navigate("/dashboard/checkin");
   };
 
   const handleHoVisitSelect = () => {
-    navigate("/dashboard/checkin", { state: { selectedLocation } });
+    navigate("/dashboard/checkin");
   };
 
   const getLocationIcon = (locationName) => {

@@ -34,7 +34,7 @@ createRoot(document.getElementById("root")).render(
           <ThemeProvider theme={theme}>
             <CssBaseline />
             <App />
-            <Toaster position="top-right" reverseOrder={false} />
+            <Toaster position="top-center" reverseOrder={false} />
           </ThemeProvider>
         </BrowserRouter>
       </PersistGate>

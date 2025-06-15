@@ -1,26 +1,41 @@
 import { createSlice } from "@reduxjs/toolkit";
-
+import { fetchSessionStatus } from "../thunks/sessionThunks";
 const initialState = {
-  session: null,
+  sessionStatus: null,
+  locationDetails: null,
+  farmDetails: null,
+  formStatus: null,
 };
 
 const sessionSlice = createSlice({
   name: "session",
   initialState,
   reducers: {
-    setSession(state, action) {
-      state.session = action.payload;
+    setSessionStatus(state, action) {
+      state.sessionStatus = action.payload;
     },
-    updateSessionField(state, action) {
-      if (!state.session) state.session = {};
-      const { field, value } = action.payload;
-      state.session[field] = value;
+    setFormStatus(state, action) {
+      state.formStatus = action.payload;
     },
-    clearSession(state) {
-      state.session = null;
+    setLocation: (state, action) => {
+      state.locationDetails = action.payload;
     },
+    setFarm: (state, action) => {
+      state.farmDetails = action.payload;
+    },
+    resetSession: () => initialState,
+  },
+  extraReducers: (builder) => {
+    builder.addCase(fetchSessionStatus.fulfilled, (state, action) => {
+      state.sessionStatus = action.payload;
+    });
   },
 });
-export const { setSession, updateSessionField, clearSession } =
-  sessionSlice.actions;
+export const {
+  setSessionStatus,
+  setLocation,
+  setFarm,
+  setFormStatus,
+  resetSession,
+} = sessionSlice.actions;
 export default sessionSlice.reducer;

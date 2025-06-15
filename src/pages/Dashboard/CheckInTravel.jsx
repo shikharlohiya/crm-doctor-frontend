@@ -11,11 +11,12 @@ import {
   Play,
 } from "lucide-react";
 import axiosInstance from "../../library/axios";
-import { useSelector } from "react-redux";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useSelector, useDispatch } from "react-redux";
+import { setSessionStatus } from "../../redux/slices/sessionSlice";
+import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
-const CheckInTravel = ({ onBack }) => {
+const CheckInTravel = () => {
   const [isCheckedIn, setIsCheckedIn] = useState(false);
   const [travelData, setTravelData] = useState([]);
   const [activeTravel, setActiveTravel] = useState(null);
@@ -27,13 +28,18 @@ const CheckInTravel = ({ onBack }) => {
   const [coordinates, setCoordinates] = useState(null);
   const [error, setError] = useState(null);
 
-  const user = useSelector((state) => state.user);
-  const employeeId = user.user.EmployeeId;
+  const user = useSelector((state) => state.user.user);
+  const employeeId = user.EmployeeId;
 
-  const location = useLocation();
   const navigate = useNavigate();
-  const { farmData, selectedLocation } = location.state || {};
-  console.log(farmData, selectedLocation);
+  const dispatch = useDispatch();
+
+  const locationDetails = useSelector((state) => state.session.locationDetails);
+  const farmDetails = useSelector((state) => state.session.farmDetails);
+  const sessionStatus = useSelector((state) => state.session.sessionStatus);
+  const formStatus = useSelector((state) => state.session.formStatus);
+  console.log(formStatus);
+
   // Get user's current location
   const getCurrentLocation = () => {
     return new Promise((resolve, reject) => {
@@ -87,10 +93,9 @@ const CheckInTravel = ({ onBack }) => {
         `/doctor/daily-travel-info?EmployeeId=${employeeId}`
       );
       const result = response.data;
-      console.log(result);
-
       if (result.success && result.data && Array.isArray(result.data.travels)) {
         setTravelData(result.data.travels);
+        console.log(result.data.travels);
 
         // Check if there's an active travel (no checkout time)
         const activeTravelRecord = result.data.travels.find(
@@ -126,9 +131,9 @@ const CheckInTravel = ({ onBack }) => {
 
       const response = await axiosInstance.post(`/doctor/checkin`, checkInData);
       const result = response?.data;
-      console.log(result);
       if (result.success) {
         setIsCheckedIn(true);
+        dispatch(setSessionStatus("checked_in"));
         // Refresh travel data to get the new check-in record
         await fetchTravelData();
         toast.success(result.message);
@@ -169,9 +174,7 @@ const CheckInTravel = ({ onBack }) => {
   // Handle start form
   const handleStartForm = () => {
     if (activeTravel) {
-      navigate("/dashboard/form", {
-        state: { activeTravel, selectedLocation },
-      });
+      navigate("/dashboard/form");
     } else {
       alert("No active travel found. Please check in first.");
     }
@@ -198,7 +201,7 @@ const CheckInTravel = ({ onBack }) => {
             </div>
             <div className="text-right">
               <button
-                onClick={onBack}
+                onClick={() => navigate("/dashboard")}
                 className="text-blue-100 hover:text-white text-sm transition-colors mb-1 block"
               >
                 Back
@@ -215,8 +218,8 @@ const CheckInTravel = ({ onBack }) => {
               <p className="text-xs text-gray-600">Location</p>
               <p className="text-sm font-medium text-gray-900">
                 {/* {LocationName} */}
-                {selectedLocation?.farmData &&
-                  ` - ${selectedLocation.farmData.farm.FarmName}`}
+                {locationDetails?.locationName}
+                {farmDetails && ` - ${farmDetails.farmName}`}
               </p>
             </div>
           </div>
@@ -226,7 +229,7 @@ const CheckInTravel = ({ onBack }) => {
             <div>
               <p className="text-xs text-gray-600">Doctor</p>
               <p className="text-sm font-medium text-gray-900">
-                {user?.username}
+                {user?.EmployeeName} (ID- {user?.EmployeeId})
               </p>
             </div>
           </div>
@@ -236,9 +239,11 @@ const CheckInTravel = ({ onBack }) => {
             <div>
               <p className="text-xs text-gray-600">Status</p>
               <p className="text-sm font-medium text-gray-900">
-                {isCheckedIn
-                  ? `Checked in at ${formatDate(activeTravel?.checkinTime)}`
-                  : "Not checked in"}
+                {sessionStatus === "not_checked_in"
+                  ? "Check In Pending"
+                  : sessionStatus === "checked_in"
+                  ? "Checked In"
+                  : "Checked Out"}
               </p>
             </div>
           </div>
