@@ -3,6 +3,7 @@ import axiosInstance from "../../library/axios";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { setLocation, setFarm } from "../../redux/slices/sessionSlice";
+import { Button } from "@mui/material";
 
 const LocationSelector = () => {
   const [locations, setLocations] = useState([]);
@@ -109,23 +110,12 @@ const LocationSelector = () => {
     navigate("/dashboard/checkin");
   };
 
-  const getLocationIcon = (locationName) => {
-    switch (locationName) {
-      case "Farm Visit":
-        return "🚜";
-      case "HO Visit":
-        return "🏥";
-      default:
-        return "📍";
-    }
-  };
-
   if (loading) {
     return (
-      <div className="min-h-screen px-4 py-8 bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+      <div className="flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading locations...</p>
+          <p className="text-gray-600">Loading...</p>
         </div>
       </div>
     );
@@ -151,9 +141,9 @@ const LocationSelector = () => {
   }
 
   return (
-    <div className="min-h-screen px-4 py-8 bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div className="">
       <div className="max-w-2xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="bg-white rounded-2xl p-8">
           {/* Header */}
           <div className="flex items-center justify-between mb-6">
             <div>
@@ -169,10 +159,11 @@ const LocationSelector = () => {
                   ? "Choose the type of visit"
                   : selectedLocation.LocationName === "Farm Visit"
                   ? "Select your assigned farm"
-                  : "Proceed with HO visit"}
+                  : "Head Office visit"}
               </p>
             </div>
-            <button
+            <Button
+              variant="outlined"
               onClick={(e) => {
                 e.preventDefault();
                 if (selectedLocation !== null) {
@@ -183,22 +174,9 @@ const LocationSelector = () => {
               }}
               className="text-gray-500 hover:text-gray-700 p-2 rounded-lg transition-colors hover:bg-gray-100"
             >
-              ← Back
-            </button>
+              Back
+            </Button>
           </div>
-
-          {/* Breadcrumb */}
-          {selectedLocation && (
-            <div className="mb-6 text-sm text-gray-600">
-              <span className="cursor-pointer hover:text-blue-600">
-                Visit Types
-              </span>
-              <span className="mx-2">→</span>
-              <span className="font-medium text-gray-900">
-                {selectedLocation.LocationName}
-              </span>
-            </div>
-          )}
 
           {/* Location Selection */}
           {!selectedLocation ? (
@@ -211,9 +189,6 @@ const LocationSelector = () => {
                     className="w-full text-left p-6 border-2 border-gray-200 rounded-xl hover:border-blue-500 hover:bg-blue-50 transition-all duration-200 hover:shadow-lg transform hover:scale-105"
                   >
                     <div className="flex items-center">
-                      <span className="text-3xl mr-4">
-                        {getLocationIcon(location.LocationName)}
-                      </span>
                       <div>
                         <span className="font-semibold text-gray-900 text-lg block">
                           {location.LocationName}
@@ -229,7 +204,6 @@ const LocationSelector = () => {
                 ))
               ) : (
                 <div className="text-center py-8 text-gray-500">
-                  <span className="text-4xl mb-4 block">📍</span>
                   <p>No locations available</p>
                 </div>
               )}

@@ -13,7 +13,7 @@ import {
 import axiosInstance from "../../library/axios";
 import { useSelector, useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import { setFormStatus } from "../../redux/slices/sessionSlice";
+import { resetSession, setFormStatus } from "../../redux/slices/sessionSlice";
 import toast from "react-hot-toast";
 
 const Form = () => {
@@ -29,8 +29,8 @@ const Form = () => {
   const [supportFormData, setSupportFormData] = useState({});
   const [images, setImages] = useState({});
   const [submitting, setSubmitting] = useState(false);
-  const [showCheckout, setShowCheckout] = useState(false);
   const [formDetailId, setFormDetailId] = useState(null);
+  const [remark, setRemark] = useState("");
 
   const user = useSelector((state) => state.user.user);
   const employeeId = user.EmployeeId;
@@ -38,9 +38,7 @@ const Form = () => {
   const sessionStatus = useSelector((state) => state.session.sessionStatus);
   const locationDetails = useSelector((state) => state.session.locationDetails);
   const farmDetails = useSelector((state) => state.session.farmDetails);
-  console.log(sessionStatus, locationDetails, farmDetails);
-
-  console.log(formStatus);
+  // const isHOVisit = locationDetails?.locationId === 2 ? true : false;
 
   const location = useLocation();
   const dispatch = useDispatch();
@@ -189,6 +187,7 @@ const Form = () => {
       if (result.success) {
         console.log("Checkout response:", result);
         toast.success("Checkout successful!");
+        dispatch(resetSession());
         navigate("/dashboard");
         // Call the parent function to show travel history
         // Pass a parameter to indicate we want travel history
@@ -265,10 +264,7 @@ const Form = () => {
       formData.append("EmployeeId", employeeId);
       formData.append("LocationId", selectedLocation?.locationId || 2);
       formData.append("FarmId", selectedLocation?.farmData?.FarmId || 1);
-      formData.append(
-        "remark",
-        `Visit completed by ${user?.EmployeeName}. Checklist items: ${selectedChecklistItems.length} completed.`
-      );
+      formData.append("remark", remark);
 
       // Prepare category details array
       const categoryDetails = [];
@@ -285,7 +281,7 @@ const Form = () => {
           categoryDetails.push({
             CategoryId: categoryId,
             SubCategoryId: parseInt(subcategoryId),
-            status: data.observation ? "completed" : "pending",
+            // status: data.observation ? "completed" : "pending",
             Observation: data.observation || "",
           });
 
@@ -326,8 +322,6 @@ const Form = () => {
         }
         dispatch(setFormStatus("submitted"));
         toast.success("Visit report submitted successfully!");
-        navigate("/dashboard/checkin");
-        setShowCheckout(true); // Show checkout button after successful submission
       } else {
         throw new Error(result.message || "Form submission failed");
       }
@@ -341,7 +335,7 @@ const Form = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+      <div className="flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading farm visit form...</p>
@@ -370,8 +364,8 @@ const Form = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="max-w-md mx-auto bg-white min-h-screen shadow-xl">
+    <div className="">
+      <div className="max-w-md mx-auto shadow-xl">
         <div className="bg-white overflow-hidden">
           {/* Header */}
           <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
@@ -386,8 +380,8 @@ const Form = () => {
               </div>
               <div className="text-right">
                 <button
-                  onClick={() => navigate("/dashboard")}
-                  className="text-blue-100 hover:text-white text-sm transition-colors mb-1 block"
+                  onClick={() => navigate("/dashboard/checkin")}
+                  className="text-white text-sm transition-colors mb-1 border border-white rounded-lg px-2 py-1 m-1 block"
                 >
                   Back
                 </button>
@@ -498,9 +492,9 @@ const Form = () => {
                   <h2 className="text-2xl font-semibold text-gray-800">
                     Support
                   </h2>
-                  {/* <span className="bg-orange-100 text-orange-800 text-sm px-2 py-1 rounded-full">
-                  {Object.keys(groupedSupportData).length} categories
-                </span> */}
+                  <span className="bg-orange-100 text-orange-800 text-sm px-2 py-1 rounded-full">
+                    {Object.keys(groupedSupportData).length} categories
+                  </span>
                 </div>
 
                 {Object.keys(groupedSupportData).length > 0 ? (
@@ -642,29 +636,6 @@ const Form = () => {
                                     }
                                   />
                                 </div>
-                                {/* Status Dropdown */}
-                                <div className="space-y-2">
-                                  <label className="block text-sm font-medium text-gray-700">
-                                    Status
-                                  </label>
-                                  <select
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                                    value={
-                                      supportFormData[subcategory.id]?.status ||
-                                      "pending"
-                                    }
-                                    onChange={(e) =>
-                                      handleSupportFormChange(
-                                        subcategory.id,
-                                        "status",
-                                        e.target.value
-                                      )
-                                    }
-                                  >
-                                    <option value="pending">Pending</option>
-                                    <option value="completed">Completed</option>
-                                  </select>
-                                </div>
                               </div>
                             </div>
                           )
@@ -679,13 +650,27 @@ const Form = () => {
                   </div>
                 )}
               </section>
+
+              {/* Remark section */}
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Remark
+                </label>
+                <textarea
+                  rows={4}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all duration-200 text-sm min-h-24"
+                  placeholder={`Enter remark`}
+                  value={remark || ""}
+                  onChange={(e) => setRemark(e.target.value)}
+                />
+              </div>
               {/* Submit/Checkout Section */}
               <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4 -mx-4">
                 <button
                   type="submit"
-                  disabled={selectedChecklistItems.length === 0 || submitting}
+                  disabled={submitting}
                   className={`w-full py-3 px-6 rounded-xl font-semibold shadow-lg transform transition-all duration-200 ${
-                    selectedChecklistItems.length === 0 || submitting
+                    submitting
                       ? "bg-gray-400 text-gray-200 cursor-not-allowed"
                       : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 hover:scale-105"
                   }`}
@@ -720,16 +705,8 @@ const Form = () => {
                     You can now checkout from this location
                   </p>
                 </div>
-
                 <div className="flex space-x-3">
-                  <button
-                    type="button"
-                    onClick={() => navigate("/dashboard/checkin")}
-                    className="flex-1 bg-gray-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-600 transition-colors"
-                  >
-                    Back
-                  </button>
-
+                  {/* checkout button */}
                   <button
                     type="button"
                     onClick={handleCheckout}

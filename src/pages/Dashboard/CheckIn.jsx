@@ -14,7 +14,6 @@ const CheckIn = () => {
     <Box sx={{ display: "flex", justifyContent: "center", px: 2 }}>
       <Box sx={{ textAlign: "center" }}>
         <Paper
-          elevation={8}
           sx={{
             p: 4,
             maxWidth: "md",

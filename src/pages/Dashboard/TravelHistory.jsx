@@ -13,8 +13,12 @@ import {
   FileText,
   Activity,
 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import axiosInstance from "../../library/axios";
+import { useNavigate } from "react-router-dom";
 
-const TravelHistory = ({ user, onBack }) => {
+const TravelHistory = () => {
   const [travels, setTravels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -22,17 +26,19 @@ const TravelHistory = ({ user, onBack }) => {
   const [expandedItems, setExpandedItems] = useState({});
   const [pagination, setPagination] = useState({});
 
-  const baseUrl = "http://localhost:5000";
-  const employeeId = "10001020";
+  const user = useSelector((state) => state.user.user);
+  const employeeId = user.EmployeeId;
+  const navigate = useNavigate();
 
   // Fetch travel history
   const fetchTravelHistory = async () => {
     try {
       setLoading(true);
-      const response = await fetch(
-        `${baseUrl}/api/doctor/daily-travel-info?EmployeeId=${employeeId}&limit=20`
+      const response = await axiosInstance.get(
+        `/doctor/daily-travel-info?EmployeeId=${employeeId}`
       );
-      const result = await response.json();
+      const result = response.data;
+      console.log(result);
 
       if (result.success && result.data) {
         setTravels(result.data.travels || []);
@@ -124,8 +130,8 @@ const TravelHistory = ({ user, onBack }) => {
   console.log(travels);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="max-w-md mx-auto bg-white min-h-screen shadow-xl">
+    <div className="">
+      <div className="mx-auto">
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
           <div className="flex justify-between items-start">
@@ -137,10 +143,17 @@ const TravelHistory = ({ user, onBack }) => {
             </div>
             <div className="text-right">
               <button
-                onClick={onBack}
-                className="text-blue-100 hover:text-white text-sm transition-colors mb-1 block"
+                onClick={() => navigate("/dashboard/location-selector")}
+                disabled={!travels.every((travel) => travel.checkoutTime)}
+                className={`text-sm transition-colors mb-1 border rounded-lg px-2 py-1 m-1 block ${
+                  travels.every((travel) => travel.checkoutTime)
+                    ? "text-white border-white hover:bg-white hover:bg-opacity-10"
+                    : "text-gray-300 border-gray-300 cursor-not-allowed"
+                }`}
               >
-                ← Back
+                {travels.every((travel) => travel.checkoutTime)
+                  ? "Check-in"
+                  : "Complete checkout"}
               </button>
             </div>
           </div>
@@ -159,9 +172,8 @@ const TravelHistory = ({ user, onBack }) => {
               </div>
             </div>
             <div className="text-right">
-              <p className="text-gray-600 text-xs">Total Visits</p>
-              <p className="font-bold text-blue-600 text-lg">
-                {travels.length}
+              <p className="text-gray-600 text-xs">
+                Total Visits- {travels.length}
               </p>
             </div>
           </div>
@@ -182,7 +194,6 @@ const TravelHistory = ({ user, onBack }) => {
                       <div className="bg-blue-100 rounded-full p-2">
                         <MapPin className="h-4 w-4 text-blue-600" />
                       </div>
-
                       <div>
                         <p className="font-semibold text-gray-800">
                           Travel #{travel.id}
@@ -209,6 +220,14 @@ const TravelHistory = ({ user, onBack }) => {
                           <ChevronDown className="h-4 w-4" />
                         )}
                       </button>
+                      {!travel.checkoutTime && (
+                        <button
+                          onClick={() => navigate("/dashboard/checkin")}
+                          className="text-black text-sm transition-colors mb-1 border border-black rounded-lg px-2 py-1 m-1 block"
+                        >
+                          view
+                        </button>
+                      )}
                     </div>
                   </div>
 

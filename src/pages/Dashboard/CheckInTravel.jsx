@@ -15,6 +15,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { setSessionStatus } from "../../redux/slices/sessionSlice";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { Button } from "@mui/material";
 
 const CheckInTravel = () => {
   const [isCheckedIn, setIsCheckedIn] = useState(false);
@@ -185,8 +186,8 @@ const CheckInTravel = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="max-w-md mx-auto bg-white min-h-screen shadow-xl">
+    <div className="">
+      <div className="max-w-md mx-auto ">
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
           <div className="flex justify-between items-start">
@@ -202,7 +203,7 @@ const CheckInTravel = () => {
             <div className="text-right">
               <button
                 onClick={() => navigate("/dashboard")}
-                className="text-blue-100 hover:text-white text-sm transition-colors mb-1 block"
+                className="text-white text-sm transition-colors mb-1 border border-white rounded-lg px-2 py-1 m-1 block"
               >
                 Back
               </button>
@@ -312,14 +313,14 @@ const CheckInTravel = () => {
                   <Calendar className="h-5 w-5 text-blue-600" />
                   <div>
                     <h2 className="text-lg font-semibold text-gray-800">
-                      Today's Travel
+                      Today's Visits
                     </h2>
-                    <p className="text-xs text-gray-600">History</p>
                   </div>
                   <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
                     {travelData.length} records
                   </span>
                 </div>
+                {console.log(travelData)}
                 <button
                   onClick={fetchTravelData}
                   disabled={travelLoading}
@@ -359,7 +360,7 @@ const CheckInTravel = () => {
                               }`}
                             ></span>
                             <span className="font-medium text-gray-900 text-sm">
-                              Travel #{travel.id}
+                              Visit ID- {travel.id}
                             </span>
                             {!travel.checkoutTime && (
                               <span className="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">
@@ -395,7 +396,9 @@ const CheckInTravel = () => {
                             </span>
                           )}
                           {!travel.checkoutTime && (
-                            <Play className="h-4 w-4 text-green-600" />
+                            <span className="bg-red-100 text-red-800 text-xs px-2 py-0.5 rounded-full">
+                              Checkout Pending
+                            </span>
                           )}
                         </div>
                       </div>
@@ -427,7 +430,7 @@ const CheckInTravel = () => {
             "Checkout"
           )}
         </button> */}
-        {isCheckedIn && activeTravel && (
+        {/* {isCheckedIn && activeTravel && (
           <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4">
             <button
               onClick={handleStartForm}
@@ -437,7 +440,7 @@ const CheckInTravel = () => {
               Start Form
             </button>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );
