@@ -40,7 +40,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="p-4">
+    <div className="">
       {isCheckedIn === "not_checked_in" ? <CheckIn /> : <TravelHistory />}
     </div>
   );

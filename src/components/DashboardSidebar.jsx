@@ -10,14 +10,13 @@ import {
   Typography,
   IconButton,
   Paper,
+  Divider,
   useTheme,
 } from "@mui/material";
 import {
-  Home,
+  Dashboard,
   Menu as MenuIcon,
   Close as CloseIcon,
-  Analytics,
-  Dashboard,
 } from "@mui/icons-material";
 
 export default function DashboardSidebar({ collapsed = false, close }) {
@@ -41,175 +40,128 @@ export default function DashboardSidebar({ collapsed = false, close }) {
     {
       path: "/dashboard",
       icon: <Dashboard />,
-      label: "Dashboard",
+      label: "Travel History",
     },
-    {
-      path: "/analytics",
-      icon: <Analytics />,
-      label: "Analytics",
-    },
+    // Add more menu items here
   ];
 
   const isActiveRoute = (path) => location.pathname === path;
-  const drawerWidth = isMobile ? 280 : isCollapsed ? 80 : 256;
+  const drawerWidth = isMobile ? 280 : isCollapsed ? 72 : 240;
 
   return (
     <Paper
       component="aside"
-      elevation={6}
-      square
+      elevation={3}
       sx={{
         width: drawerWidth,
-        flexShrink: 0,
-        height: "100%",
-        zIndex: 10,
+        height: "100vh",
         transition: theme.transitions.create("width", {
           easing: theme.transitions.easing.sharp,
-          duration: theme.transitions.duration.enteringScreen,
+          duration: theme.transitions.duration.standard,
         }),
-        background: theme.palette.error.main,
-        backgroundImage: `linear-gradient(to bottom, ${theme.palette.error.light}, ${theme.palette.error.main}, ${theme.palette.error.dark})`,
+        bgcolor: "#ffffff",
+        borderRight: `1px solid ${theme.palette.divider}`,
         overflow: "hidden",
+        position: "relative",
       }}
     >
-      <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
-        {/* Header */}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            p: 2,
-            borderBottom: `1px solid ${theme.palette.error.dark}`,
-          }}
-        >
-          {(!isCollapsed || isMobile) && (
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-              <Paper
-                elevation={0}
-                sx={{
-                  width: 56,
-                  height: 48,
-                  bgcolor: "rgba(255, 255, 255, 0.1)",
-                  borderRadius: 2,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              />
-              <Typography
-                variant="h6"
-                sx={{
-                  fontWeight: 700,
-                  letterSpacing: 1,
-                  textTransform: "uppercase",
-                  fontFamily: "'Poppins', sans-serif",
-                  color: theme.palette.common.white,
-                }}
-              >
-                ABIS DOCTOR-CRM
-              </Typography>
-            </Box>
-          )}
+      {/* Header */}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: isCollapsed && !isMobile ? "center" : "space-between",
+          p: 2,
+        }}
+      >
+        {!isCollapsed || isMobile ? (
+          <Typography
+            variant="h6"
+            sx={{
+              fontWeight: 700,
+              textTransform: "uppercase",
+              fontSize: 16,
+              fontFamily: "'Poppins', sans-serif",
+              color: theme.palette.text.primary,
+            }}
+          >
+            ABIS CRM
+          </Typography>
+        ) : (
+          <Box sx={{ width: 24, height: 24 }} />
+        )}
 
-          {isMobile && close ? (
-            <IconButton
-              onClick={close}
-              aria-label="Close sidebar"
-              color="inherit"
-              size="small"
-              sx={{ color: theme.palette.common.white }}
-            >
-              <CloseIcon />
+        {isMobile && close ? (
+          <IconButton onClick={close}>
+            <CloseIcon />
+          </IconButton>
+        ) : (
+          !isMobile && (
+            <IconButton onClick={toggleCollapse}>
+              <MenuIcon />
             </IconButton>
-          ) : (
-            !isMobile && (
-              <IconButton
-                onClick={toggleCollapse}
-                aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-                color="inherit"
-                size="small"
-                sx={{ color: theme.palette.common.white }}
-              >
-                <MenuIcon />
-              </IconButton>
-            )
-          )}
-        </Box>
+          )
+        )}
+      </Box>
 
-        {/* Navigation */}
-        <List sx={{ flexGrow: 1, px: 2, py: 3 }}>
-          {menuItems.map((item) => {
-            const isActive = isActiveRoute(item.path);
+      <Divider />
 
-            return (
-              <ListItem key={item.path} disablePadding sx={{ mb: 1 }}>
-                <ListItemButton
-                  component={Link}
-                  to={item.path}
-                  onClick={close}
-                  selected={isActive}
-                  sx={{
-                    px: 2,
-                    py: 1.5,
-                    borderRadius: 3,
-                    justifyContent:
-                      isCollapsed && !isMobile ? "center" : "flex-start",
-                    bgcolor: isActive ? "rgba(0, 0, 0, 0.2)" : "transparent",
-                    "&.Mui-selected": {
-                      bgcolor: "rgba(0, 0, 0, 0.2)",
-                      "&:hover": {
-                        bgcolor: "rgba(0, 0, 0, 0.3)",
-                      },
-                    },
+      {/* Navigation */}
+      <List sx={{ py: 2 }}>
+        {menuItems.map((item) => {
+          const isActive = isActiveRoute(item.path);
+          return (
+            <ListItem key={item.path} disablePadding>
+              <ListItemButton
+                component={Link}
+                to={item.path}
+                onClick={close}
+                selected={isActive}
+                sx={{
+                  py: 1.5,
+                  px: isCollapsed && !isMobile ? 1 : 2.5,
+                  borderRadius: 2,
+                  mx: 1,
+                  mb: 1,
+                  justifyContent:
+                    isCollapsed && !isMobile ? "center" : "flex-start",
+                  bgcolor: isActive ? "rgba(0, 123, 255, 0.1)" : "transparent",
+                  "&.Mui-selected": {
+                    bgcolor: "rgba(0, 123, 255, 0.1)",
                     "&:hover": {
-                      bgcolor: "rgba(0, 0, 0, 0.1)",
+                      bgcolor: "rgba(0, 123, 255, 0.15)",
                     },
-                    position: "relative",
+                  },
+                  "&:hover": {
+                    bgcolor: "rgba(0, 0, 0, 0.03)",
+                  },
+                }}
+              >
+                <ListItemIcon
+                  sx={{
+                    minWidth: 0,
+                    mr: !isCollapsed || isMobile ? 2 : 0,
+                    color: theme.palette.primary.main,
                   }}
                 >
-                  <ListItemIcon
-                    sx={{
-                      minWidth: 0,
-                      mr: !isCollapsed || isMobile ? 2 : 0,
-                      color: theme.palette.common.white,
+                  {item.icon}
+                </ListItemIcon>
+
+                {(!isCollapsed || isMobile) && (
+                  <ListItemText
+                    primary={item.label}
+                    primaryTypographyProps={{
+                      fontSize: 14,
+                      fontWeight: 500,
+                      color: theme.palette.text.primary,
                     }}
-                  >
-                    {item.icon}
-                  </ListItemIcon>
-
-                  {(!isCollapsed || isMobile) && (
-                    <ListItemText
-                      primary={item.label}
-                      primaryTypographyProps={{
-                        fontSize: 14,
-                        fontWeight: 500,
-                        color: theme.palette.common.white,
-                      }}
-                    />
-                  )}
-
-                  {isActive && (
-                    <Box
-                      sx={{
-                        position: "absolute",
-                        right: 0,
-                        top: "50%",
-                        transform: "translateY(-50%)",
-                        width: 4,
-                        height: 32,
-                        bgcolor: theme.palette.common.white,
-                        borderTopLeftRadius: 4,
-                        borderBottomLeftRadius: 4,
-                      }}
-                    />
-                  )}
-                </ListItemButton>
-              </ListItem>
-            );
-          })}
-        </List>
-      </Box>
+                  />
+                )}
+              </ListItemButton>
+            </ListItem>
+          );
+        })}
+      </List>
     </Paper>
   );
 }

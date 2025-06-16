@@ -189,15 +189,14 @@ const CheckInTravel = () => {
     <div className="">
       <div className="max-w-md mx-auto ">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+        <div className="bg-gradient-to-r from-green-700 to-green-800 px-6 py-4 rounded-lg">
           <div className="flex justify-between items-start">
             <div>
-              <h1 className="text-xl font-bold text-white">Check In</h1>
-              <h1 className="text-xl font-bold text-white">Management</h1>
-              <p className="text-blue-100 text-sm mt-1">
+              <h1 className="text-xl font-bold text-white">Visit Management</h1>
+              <p className="text-white text-sm mt-1">
                 {!isCheckedIn
                   ? "Check in to start your visit"
-                  : "Manage your visit and travel history"}
+                  : "Manage your visit and travel"}
               </p>
             </div>
             <div className="text-right">
@@ -316,9 +315,6 @@ const CheckInTravel = () => {
                       Today's Visits
                     </h2>
                   </div>
-                  <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
-                    {travelData.length} records
-                  </span>
                 </div>
                 {console.log(travelData)}
                 <button
@@ -339,71 +335,75 @@ const CheckInTravel = () => {
                 </div>
               ) : travelData.length > 0 ? (
                 <div className="space-y-3">
-                  {travelData.map((travel) => (
-                    <div
-                      key={travel.id}
-                      onClick={() => !travel.checkoutTime && handleStartForm()}
-                      className={`border rounded-xl p-4 transition-all cursor-pointer ${
-                        !travel.checkoutTime
-                          ? "border-green-500 bg-green-50 shadow-md hover:shadow-lg"
-                          : "border-gray-200 bg-gray-50"
-                      }`}
-                    >
-                      <div className="flex justify-between items-start">
-                        <div className="space-y-2 flex-1">
-                          <div className="flex items-center space-x-2">
-                            <span
-                              className={`inline-block w-2 h-2 rounded-full ${
-                                !travel.checkoutTime
-                                  ? "bg-green-500 animate-pulse"
-                                  : "bg-gray-400"
-                              }`}
-                            ></span>
-                            <span className="font-medium text-gray-900 text-sm">
-                              Visit ID- {travel.id}
-                            </span>
-                            {!travel.checkoutTime && (
-                              <span className="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">
-                                Active
-                              </span>
-                            )}
-                          </div>
-
-                          <div className="text-xs space-y-1">
-                            <div>
-                              <span className="text-gray-600">Check-in:</span>
-                              <span className="font-medium ml-1">
-                                {formatDate(travel.checkinTime)}
-                              </span>
-                            </div>
-                            {travel.checkoutTime && (
-                              <div>
-                                <span className="text-gray-600">
-                                  Check-out:
+                  {travelData
+                    .filter((travel) => !travel.checkoutTime)
+                    .map((travel) => (
+                      <div
+                        key={travel.id}
+                        onClick={() =>
+                          !travel.checkoutTime && handleStartForm()
+                        }
+                        className={`border rounded-xl p-4 transition-all cursor-pointer ${
+                          !travel.checkoutTime
+                            ? "border-green-500 bg-green-50 shadow-md hover:shadow-lg"
+                            : "border-gray-200 bg-gray-50"
+                        }`}
+                      >
+                        <div className="flex justify-between items-start">
+                          <div className="space-y-2 flex-1">
+                            <div className="flex items-center space-x-2">
+                              <span
+                                className={`inline-block w-2 h-2 rounded-full ${
+                                  !travel.checkoutTime
+                                    ? "bg-green-500 animate-pulse"
+                                    : "bg-gray-400"
+                                }`}
+                              ></span>
+                              {/* <span className="font-medium text-gray-900 text-sm">
+                                Visit ID- {travel.id}
+                              </span> */}
+                              {!travel.checkoutTime && (
+                                <span className="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">
+                                  Active
                                 </span>
+                              )}
+                            </div>
+
+                            <div className="text-xs space-y-1">
+                              <div>
+                                <span className="text-gray-600">Check-in:</span>
                                 <span className="font-medium ml-1">
-                                  {formatDate(travel.checkoutTime)}
+                                  {formatDate(travel.checkinTime)}
                                 </span>
                               </div>
+                              {travel.checkoutTime && (
+                                <div>
+                                  <span className="text-gray-600">
+                                    Check-out:
+                                  </span>
+                                  <span className="font-medium ml-1">
+                                    {formatDate(travel.checkoutTime)}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col items-end space-y-1">
+                            {travel.DocFormDetailId && (
+                              <span className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">
+                                Form Completed
+                              </span>
+                            )}
+                            {!travel.checkoutTime && (
+                              <span className="bg-red-100 text-red-800 text-xs px-2 py-0.5 rounded-full">
+                                Checkout Pending
+                              </span>
                             )}
                           </div>
                         </div>
-
-                        <div className="flex flex-col items-end space-y-1">
-                          {travel.DocFormDetailId && (
-                            <span className="bg-blue-100 text-blue-800 text-xs px-2 py-0.5 rounded-full">
-                              Form Done
-                            </span>
-                          )}
-                          {!travel.checkoutTime && (
-                            <span className="bg-red-100 text-red-800 text-xs px-2 py-0.5 rounded-full">
-                              Checkout Pending
-                            </span>
-                          )}
-                        </div>
                       </div>
-                    </div>
-                  ))}
+                    ))}
                 </div>
               ) : (
                 <div className="text-center py-8 text-gray-500">

@@ -14,6 +14,7 @@ import axiosInstance from "../../library/axios";
 import { useSelector, useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import { resetSession, setFormStatus } from "../../redux/slices/sessionSlice";
+import imageCompression from "browser-image-compression";
 import toast from "react-hot-toast";
 
 const Form = () => {
@@ -142,19 +143,34 @@ const Form = () => {
   };
 
   // Handle image upload
-  const handleImageUpload = (subcategoryId, file) => {
-    if (file) {
+  const handleImageUpload = async (subcategoryId, file) => {
+    if (!file) return;
+
+    try {
+      // Compression options
+      const options = {
+        maxSizeMB: 1,
+        maxWidthOrHeight: 1024,
+        useWebWorker: true,
+      };
+
+      // Compress the file
+      const compressedFile = await imageCompression(file, options);
+
+      // Convert to preview URL
       const reader = new FileReader();
       reader.onload = (e) => {
         setImages((prev) => ({
           ...prev,
           [subcategoryId]: {
-            file: file,
+            file: compressedFile, // Use compressed file here
             preview: e.target.result,
           },
         }));
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(compressedFile);
+    } catch (error) {
+      console.error("Image compression failed:", error);
     }
   };
 
@@ -365,16 +381,16 @@ const Form = () => {
 
   return (
     <div className="">
-      <div className="max-w-md mx-auto shadow-xl">
+      <div className="max-w-md mx-auto">
         <div className="bg-white overflow-hidden">
           {/* Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+          <div className="bg-gradient-to-r from-green-700 to-green-800 px-6 py-4 rounded-lg">
             <div className="flex justify-between items-start">
               <div>
                 <h1 className="text-xl font-bold text-white">
                   Farm Visit Report
                 </h1>
-                <p className="text-blue-100 text-sm mt-1">
+                <p className="text-white text-sm mt-1">
                   Complete checklist and document issues
                 </p>
               </div>
@@ -467,7 +483,7 @@ const Form = () => {
                         <CheckCircle className="h-6 w-6 text-blue-600" />
                       </div>
                       <h2 className="text-2xl font-semibold text-gray-800">
-                        Task Checklist
+                        Top Pointers
                       </h2>
                     </div>
 
@@ -518,16 +534,13 @@ const Form = () => {
                       <h2 className="text-2xl font-semibold text-gray-800">
                         Support
                       </h2>
-                      <span className="bg-orange-100 text-orange-800 text-sm px-2 py-1 rounded-full">
-                        {Object.keys(groupedSupportData).length} categories
-                      </span>
                     </div>
 
                     {Object.keys(groupedSupportData).length > 0 ? (
                       <div className="space-y-6">
                         {/* Category Tabs */}
                         <div className="overflow-x-auto pb-2">
-                          <div className="flex space-x-2 min-w-max">
+                          <div className="flex space-x-2 min-w-max px-2 py-1">
                             {Object.entries(groupedSupportData).map(
                               ([categoryName, subcategories]) => (
                                 <button
@@ -536,7 +549,7 @@ const Form = () => {
                                   onClick={() =>
                                     setActiveCategory(categoryName)
                                   }
-                                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+                                  className={`px-2 py-1 rounded-full text-sm font-medium transition-all duration-200 whitespace-nowrap ${
                                     activeCategory === categoryName
                                       ? "bg-blue-500 text-white shadow-md transform scale-105"
                                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -744,7 +757,7 @@ const Form = () => {
                     type="button"
                     onClick={handleCheckout}
                     disabled={submitting}
-                    className="flex-1 bg-gradient-to-r from-orange-500 to-red-600 text-white py-3 px-4 rounded-lg font-medium hover:from-orange-600 hover:to-red-700 transition-all disabled:opacity-50"
+                    className="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white font-poppins font-semibold py-3 px-4 rounded-lg hover:from-green-600 hover:to-green-700 transition-all disabled:opacity-50"
                   >
                     {submitting ? (
                       <div className="flex items-center justify-center">
