@@ -10,6 +10,8 @@ import ProtectedRoute from "./utils/ProtectedRoute";
 import LocationSelector from "./pages/Dashboard/LocationSelector";
 import CheckInTravel from "./pages/Dashboard/CheckInTravel";
 import Form from "./pages/Dashboard/Form";
+// import InstallPrompt from "./components/PWAInstallToast";
+// import { useState } from "react";
 
 const App = () => {
   return (
