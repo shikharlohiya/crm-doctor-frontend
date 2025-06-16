@@ -34,8 +34,11 @@ const TravelHistory = () => {
   const fetchTravelHistory = async () => {
     try {
       setLoading(true);
+      const today = new Date();
+      const formattedDate = today.toISOString().split("T")[0];
+
       const response = await axiosInstance.get(
-        `/doctor/daily-travel-info?EmployeeId=${employeeId}`
+        `/doctor/daily-travel-info?startDate=${formattedDate}&endDate=${formattedDate}&EmployeeId=${employeeId}`
       );
       const result = response.data;
       console.log(result);
@@ -133,13 +136,11 @@ const TravelHistory = () => {
     <div className="">
       <div className="mx-auto">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-6 py-4">
+        <div className="bg-gradient-to-r from-green-700 to-green-800 px-6 py-4 rounded-lg">
           <div className="flex justify-between items-start">
             <div>
               <h1 className="text-xl font-bold text-white">Travel History</h1>
-              <p className="text-blue-100 text-sm mt-1">
-                Complete visit records
-              </p>
+              <p className="text-white text-sm mt-1">Complete visit records</p>
             </div>
             <div className="text-right">
               <button
@@ -153,7 +154,7 @@ const TravelHistory = () => {
               >
                 {travels.every((travel) => travel.checkoutTime)
                   ? "Check-in"
-                  : "Complete checkout"}
+                  : "Checkout Pending"}
               </button>
             </div>
           </div>
@@ -167,7 +168,7 @@ const TravelHistory = () => {
               <div>
                 <p className="text-gray-600 text-xs">Doctor</p>
                 <p className="font-medium text-gray-900 text-sm">
-                  {user?.username}
+                  {user?.EmployeeName}
                 </p>
               </div>
             </div>
@@ -195,12 +196,13 @@ const TravelHistory = () => {
                         <MapPin className="h-4 w-4 text-blue-600" />
                       </div>
                       <div>
-                        <p className="font-semibold text-gray-800">
+                        {console.log(travel)}
+                        {/* <p className="font-semibold text-gray-800">
                           Travel #{travel.id}
                         </p>
                         <p className="text-xs text-gray-500">
                           Employee ID: {travel.EmployeeId}
-                        </p>
+                        </p> */}
                       </div>
                     </div>
                     <div className="flex space-x-2">

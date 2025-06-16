@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 import { Box, Drawer, useMediaQuery, useTheme } from "@mui/material";
-// import DashboardSidebar from "../components/DashboardSidebar";
+import DashboardSidebar from "../components/DashboardSidebar";
 import DashboardTopbar from "../components/DashboardTopbar";
 
 export default function DashboardLayout() {
@@ -32,7 +32,7 @@ export default function DashboardLayout() {
         <Box sx={{ display: "flex", height: "100vh" }}>
           {/* Desktop Sidebar */}
           <Box sx={{ flexShrink: 0 }}>
-            {/* <DashboardSidebar collapsed={false} /> */}
+            <DashboardSidebar collapsed={false} />
           </Box>
 
           {/* Desktop Main Content */}
@@ -96,7 +96,7 @@ export default function DashboardLayout() {
               },
             }}
           >
-            {/* <DashboardSidebar collapsed={false} close={closeMobileSidebar} /> */}
+            <DashboardSidebar collapsed={false} close={closeMobileSidebar} />
           </Drawer>
         </Box>
       )}

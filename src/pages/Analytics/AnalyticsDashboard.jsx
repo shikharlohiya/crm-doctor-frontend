@@ -38,6 +38,7 @@ import {
   Settings,
   FileDown,
   Table,
+  Icon,
 } from "lucide-react";
 
 const AnalyticsDashboard = () => {
@@ -91,17 +92,17 @@ const AnalyticsDashboard = () => {
     setLoading(true);
     try {
       // Replace 'YOUR_API_BASE_URL' with your actual API base URL
-      const BASE_URL = "http://localhost:5000"; // Change this to your API base URL
+      const BASE_URL = import.meta.env.VITE_API_URL; // Change this to your API base URL
 
       const endpoints = [
-        `${BASE_URL}/api/analytics/summary-counts`,
-        `${BASE_URL}/api/analytics/form-category-status`,
-        `${BASE_URL}/api/analytics/doctor-unit-distribution`,
-        `${BASE_URL}/api/analytics/doctor-farm-distribution`,
-        `${BASE_URL}/api/analytics/daily-checkins`,
-        `${BASE_URL}/api/analytics/top-doctors`,
-        `${BASE_URL}/api/analytics/form-submission-trends`,
-        `${BASE_URL}/api/analytics/category-completion-rates`,
+        `${BASE_URL}/analytics/summary-counts`,
+        `${BASE_URL}/analytics/form-category-status`,
+        `${BASE_URL}/analytics/doctor-unit-distribution`,
+        `${BASE_URL}/analytics/doctor-farm-distribution`,
+        `${BASE_URL}/analytics/daily-checkins`,
+        `${BASE_URL}/analytics/top-doctors`,
+        `${BASE_URL}/analytics/form-submission-trends`,
+        `${BASE_URL}/analytics/category-completion-rates`,
       ];
 
       // Make all API calls
@@ -321,7 +322,7 @@ const AnalyticsDashboard = () => {
           <div
             className={`p-3 rounded-xl bg-gradient-to-br ${gradient} shadow-lg`}
           >
-            <Icon className="h-6 w-6 text-white" />
+            {/* <Icon className="h-6 w-6 text-white" /> */}
           </div>
           {trend && (
             <div
