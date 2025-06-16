@@ -44,4 +44,9 @@ export default defineConfig({
       },
     }),
   ],
+  server: {
+    host: true, // This allows external connections
+    port: 5173,
+    allowedHosts: ["drcrm.abisibg.com", "localhost", "127.0.0.1"],
+  },
 });
