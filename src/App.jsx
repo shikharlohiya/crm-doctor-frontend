@@ -10,10 +10,34 @@ import ProtectedRoute from "./utils/ProtectedRoute";
 import LocationSelector from "./pages/Dashboard/LocationSelector";
 import CheckInTravel from "./pages/Dashboard/CheckInTravel";
 import Form from "./pages/Dashboard/Form";
-// import InstallPrompt from "./components/PWAInstallToast";
-// import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const App = () => {
+  const [isMobile, setIsMobile] = useState(true);
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 768); // md = 768px in Tailwind
+    };
+
+    checkScreenSize(); // initial check
+    window.addEventListener("resize", checkScreenSize); // update on resize
+
+    return () => window.removeEventListener("resize", checkScreenSize);
+  }, []);
+
+  if (!isMobile) {
+    return (
+      <div className="h-screen flex items-center justify-center bg-red-100 text-center p-4">
+        <div className="text-xl font-semibold text-red-700">
+          ❌ This application is only supported on mobile devices.
+          <br />
+          Please open it on your phone.
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <Routes>
