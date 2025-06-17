@@ -31,6 +31,7 @@ const Report = () => {
       setLoading(true);
       const response = await axiosInstance.get(
         `/analytics/report/daily-travel-info?EmployeeId=${filters.employeeId}&startDate=${filters.startDate}&endDate=${filters.endDate}`
+        // `/analytics/report/daily-travel-info?EmployeeId=${filters.employeeId}&startDate=${filters.startDate}&endDate=${filters.endDate}&page=${filters.page}&limit=${filters.limit}`
       );
       const result = response.data;
       if (result.success && result.data && Array.isArray(result.data.travels)) {
@@ -51,6 +52,7 @@ const Report = () => {
       setLoading(true);
       const response = await axiosInstance.get(
         `/analytics/report/form-details?EmployeeId=${filters.employeeId}&startDate=${filters.startDate}&endDate=${filters.endDate}`
+        // `/analytics/report/form-details?EmployeeId=${filters.employeeId}&startDate=${filters.startDate}&endDate=${filters.endDate}&page=${filters.page}&limit=${filters.limit}`
       );
       const result = response.data;
       // Fixed: the API returns result.data directly, not result.data.travels
