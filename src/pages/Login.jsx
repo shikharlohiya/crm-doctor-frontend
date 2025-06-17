@@ -13,7 +13,7 @@ import {
   Alert,
   CircularProgress,
 } from "@mui/material";
-import { LockOutlined } from "@mui/icons-material";
+import InstallPrompt from "../components/PWAInstallToast";
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -121,6 +121,7 @@ const Login = () => {
           </Button>
         </Box>
       </Paper>
+      <InstallPrompt />
     </Container>
   );
 };

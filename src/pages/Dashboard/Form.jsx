@@ -147,28 +147,18 @@ const Form = () => {
     if (!file) return;
 
     try {
-      // Compression options
-      const options = {
-        maxSizeMB: 1,
-        maxWidthOrHeight: 1024,
-        useWebWorker: true,
-      };
-
-      // Compress the file
-      const compressedFile = await imageCompression(file, options);
-
       // Convert to preview URL
       const reader = new FileReader();
       reader.onload = (e) => {
         setImages((prev) => ({
           ...prev,
           [subcategoryId]: {
-            file: compressedFile, // Use compressed file here
+            file, // Use compressed file here
             preview: e.target.result,
           },
         }));
       };
-      reader.readAsDataURL(compressedFile);
+      reader.readAsDataURL(file);
     } catch (error) {
       console.error("Image compression failed:", error);
     }
