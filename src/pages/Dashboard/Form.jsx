@@ -1352,13 +1352,23 @@ const Form = () => {
         toast.error("Image is too large. Maximum size is 10MB.");
         return;
       }
+
+      // Generate random filename
+      const fileExtension = file.name.split(".").pop();
+      const randomName = `img_${Math.random()
+        .toString(36)
+        .substring(2, 15)}_${Date.now()}.${fileExtension}`;
+
+      // Create a new file object with the random name
+      const renamedFile = new File([file], randomName, { type: file.type });
+
       // Convert to preview URL
       const reader = new FileReader();
       reader.onload = (e) => {
         setImages((prev) => ({
           ...prev,
           [subcategoryId]: {
-            file, // Use compressed file here
+            file: renamedFile,
             preview: e.target.result,
           },
         }));
@@ -1388,6 +1398,33 @@ const Form = () => {
         toast.error("Remark is required");
         return;
       }
+
+      // Check if any image is uploaded without an observation
+      let missingObservations = false;
+      let firstMissingSubcategory = null;
+
+      Object.entries(images).forEach(([subcategoryId, imageData]) => {
+        const observation = supportFormData[subcategoryId]?.observation || "";
+        if (imageData && (!observation || observation.trim() === "")) {
+          missingObservations = true;
+          if (!firstMissingSubcategory) {
+            firstMissingSubcategory = supportData.find(
+              (item) => item.id === parseInt(subcategoryId)
+            );
+          }
+        }
+      });
+
+      if (missingObservations) {
+        toast.error(
+          `Observation is required for images. Please add observation for ${
+            firstMissingSubcategory?.SubCategoryName || "all uploaded images"
+          }.`
+        );
+        setSubmitting(false);
+        return;
+      }
+
       // Prepare category details array
       const categoryDetails = [];
       const imagesToUpload = [];
@@ -1901,10 +1938,24 @@ const Form = () => {
                                       <div className="space-y-2">
                                         <label className="block text-sm font-medium text-gray-700">
                                           Observation
+                                          {images[subcategory.id] && (
+                                            <span className="text-red-500 ml-1">
+                                              *
+                                            </span>
+                                          )}
                                         </label>
                                         <textarea
                                           rows={4}
-                                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all duration-200 text-sm min-h-24"
+                                          className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all duration-200 text-sm min-h-24 ${
+                                            images[subcategory.id] &&
+                                            (!supportFormData[subcategory.id]
+                                              ?.observation ||
+                                              supportFormData[
+                                                subcategory.id
+                                              ]?.observation.trim() === "")
+                                              ? "border-red-300"
+                                              : "border-gray-300"
+                                          }`}
                                           placeholder={`Enter observations for ${subcategory.SubCategoryName}...`}
                                           value={
                                             supportFormData[subcategory.id]
