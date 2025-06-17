@@ -21,6 +21,7 @@ import {
   Person as PersonIcon,
   Logout as LogoutIcon,
 } from "@mui/icons-material";
+import { User } from "lucide-react";
 
 export default function DashboardTopbar({ onMenuClick }) {
   const dispatch = useDispatch();
@@ -74,7 +75,7 @@ export default function DashboardTopbar({ onMenuClick }) {
             aria-expanded={open ? "true" : undefined}
           >
             <Avatar sx={{ width: 32, height: 32, bgcolor: "primary.main" }}>
-              A
+              <User />
             </Avatar>
           </IconButton>
 
@@ -87,12 +88,12 @@ export default function DashboardTopbar({ onMenuClick }) {
             transformOrigin={{ horizontal: "right", vertical: "top" }}
             anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
           >
-            <MenuItem onClick={handleClose}>
+            {/* <MenuItem onClick={handleClose}>
               <ListItemIcon>
                 <PersonIcon fontSize="small" />
               </ListItemIcon>
               Profile
-            </MenuItem>
+            </MenuItem> */}
             <MenuItem onClick={handleClose}>
               <ListItemIcon>
                 <SettingsIcon fontSize="small" />

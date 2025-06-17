@@ -6,6 +6,7 @@ import NotFound from "./pages/NotFound";
 
 import Dashboard from "./pages/Dashboard/Dashboard";
 import AnalyticsDashboard from "./pages/Analytics/AnalyticsDashboard";
+import Report from "./pages/Analytics/Report";
 import ProtectedRoute from "./utils/ProtectedRoute";
 import LocationSelector from "./pages/Dashboard/LocationSelector";
 import CheckInTravel from "./pages/Dashboard/CheckInTravel";
@@ -56,6 +57,7 @@ const App = () => {
         >
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="analytics" element={<AnalyticsDashboard />} />
+          <Route path="report" element={<Report />} />
           <Route path="/dashboard/checkin" element={<CheckInTravel />} />
           <Route
             path="/dashboard/location-selector"
