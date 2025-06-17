@@ -1246,6 +1246,20 @@ const Form = () => {
   const locationDetails = useSelector((state) => state.session.locationDetails);
   const farmDetails = useSelector((state) => state.session.farmDetails);
 
+  // const selectedFarm = localStorage.getItem("selectedFarm");
+  // const FarmId = selectedFarm ? JSON.parse(selectedFarm)?.FarmId ?? null : null;
+
+  // const selectedLocation = localStorage.getItem("selectedLocation");
+  // const LocationId = selectedLocation ? JSON.parse(selectedLocation)?.LocationId ?? null : null;
+  const selectedFarm = localStorage.getItem("selectedFarm");
+  const FarmId = selectedFarm ? JSON.parse(selectedFarm)?.FarmId ?? null : null;
+
+  const selectedLocation = localStorage.getItem("selectedLocation");
+  const LocationId = selectedLocation
+    ? JSON.parse(selectedLocation)?.LocationId ?? null
+    : null;
+  console.log(FarmId, LocationId);
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -1266,6 +1280,27 @@ const Form = () => {
       setChecklistData([]);
     }
   };
+  const fetchFormStatus = async () => {
+    try {
+      const response = await axiosInstance.get(
+        `/doctor/employee/${employeeId}/status`
+      );
+      const result = response.data;
+      console.log(result);
+      if (result.success) {
+        if (result.data.DocFormDetailId === null) {
+          dispatch(setFormStatus("not-submitted"));
+        } else {
+          dispatch(setFormStatus("submitted"));
+        }
+      }
+    } catch (err) {
+      console.error("Failed to fetch form status:", err);
+    }
+  };
+  useEffect(() => {
+    fetchFormStatus();
+  }, []);
 
   const fetchSupportData = async () => {
     try {
@@ -1338,10 +1373,10 @@ const Form = () => {
     if (!file) return;
 
     try {
-      // Check file size - 7MB limit
-      const maxSizeInBytes = 10 * 1024 * 1024; // 10MB
+      // Check file size - 20MB limit
+      const maxSizeInBytes = 20 * 1024 * 1024; // 10MB
       if (file.size > maxSizeInBytes) {
-        toast.error("Image is too large. Maximum size is 10MB.");
+        toast.error("Image is too large. Maximum size is 20MB.");
         return;
       }
 
@@ -1450,8 +1485,8 @@ const Form = () => {
       // Prepare form data for first API call
       const formDataToSubmit = {
         EmployeeId: employeeId,
-        LocationId: locationDetails?.locationId,
-        FarmId: farmDetails?.farmId,
+        LocationId: LocationId,
+        FarmId: FarmId,
         remark: remark,
         categoryDetails: categoryDetails,
         checklistItems: selectedChecklistItems,
@@ -1709,14 +1744,14 @@ const Form = () => {
                 <div>
                   <p className="text-gray-600">Form Status</p>
                   <p className="font-medium text-gray-900 text-xs">
-                    {formStatus}
+                    {formStatus === "submitted" ? "Submitted" : "Not Submitted"}
                   </p>
                 </div>
               </div>
             </div>
           </div>
 
-          {!formStatus ? (
+          {!formStatus || formStatus === "not-submitted" ? (
             <form onSubmit={handleSubmit} className="p-4 space-y-6">
               {locationDetails?.locationName === "HO Visit" ? (
                 // HO Visit - Only show remark field

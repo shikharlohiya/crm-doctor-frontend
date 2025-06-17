@@ -25,10 +25,13 @@ const LocationSelector = () => {
 
   const user = useSelector((state) => state.user.user);
   const employeeId = user.EmployeeId;
-  const locationDetails = useSelector((state) => state.session.locationDetails);
-  const farmDetails = useSelector((state) => state.session.farmDetails);
   const sessionStatus = useSelector((state) => state.session.sessionStatus);
-  console.log(locationDetails, farmDetails, sessionStatus);
+
+  useEffect(() => {
+    if (sessionStatus === "checked_in") {
+      navigate("/dashboard/checkin");
+    }
+  }, []);
 
   // useEffect(() => {
   //   if (locationDetails) {
@@ -91,6 +94,8 @@ const LocationSelector = () => {
         locationName: location.LocationName,
       })
     );
+    localStorage.setItem("selectedLocation", JSON.stringify(location));
+    localStorage.setItem("selectedFarm", JSON.stringify(null));
     setSelectedLocation(location);
     if (location.LocationName === "Farm Visit") {
       fetchFarms();
@@ -104,6 +109,7 @@ const LocationSelector = () => {
         farmName: farmData.farm.FarmName,
       })
     );
+    localStorage.setItem("selectedFarm", JSON.stringify(farmData));
     navigate("/dashboard/checkin");
   };
 

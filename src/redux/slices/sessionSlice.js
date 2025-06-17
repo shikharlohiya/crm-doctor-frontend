@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchSessionStatus } from "../thunks/sessionThunks";
+// import { fetchSessionStatus } from "../thunks/sessionThunks";
 const initialState = {
   sessionStatus: null,
   locationDetails: null,
@@ -25,11 +25,11 @@ const sessionSlice = createSlice({
     },
     resetSession: () => initialState,
   },
-  extraReducers: (builder) => {
-    builder.addCase(fetchSessionStatus.fulfilled, (state, action) => {
-      state.sessionStatus = action.payload;
-    });
-  },
+  // extraReducers: (builder) => {
+  //   builder.addCase(fetchSessionStatus.fulfilled, (state, action) => {
+  //     state.sessionStatus = action.payload;
+  //   });
+  // },
 });
 export const {
   setSessionStatus,
