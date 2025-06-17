@@ -14,9 +14,12 @@ const LocationSelector = () => {
   const [farmLoading, setFarmLoading] = useState(false);
 
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   // Fetch locations on component mount
   useEffect(() => {
+    dispatch(setLocation(null));
+    dispatch(setFarm(null));
     fetchLocations();
   }, []);
 
@@ -26,8 +29,6 @@ const LocationSelector = () => {
   const farmDetails = useSelector((state) => state.session.farmDetails);
   const sessionStatus = useSelector((state) => state.session.sessionStatus);
   console.log(locationDetails, farmDetails, sessionStatus);
-
-  const dispatch = useDispatch();
 
   // useEffect(() => {
   //   if (locationDetails) {

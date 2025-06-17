@@ -1012,7 +1012,7 @@ import {
 } from "lucide-react";
 import axiosInstance from "../../library/axios";
 import { useSelector, useDispatch } from "react-redux";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { resetSession, setFormStatus } from "../../redux/slices/sessionSlice";
 import toast from "react-hot-toast";
 
@@ -1246,10 +1246,7 @@ const Form = () => {
   const locationDetails = useSelector((state) => state.session.locationDetails);
   const farmDetails = useSelector((state) => state.session.farmDetails);
 
-  const location = useLocation();
   const dispatch = useDispatch();
-  const { activeTravel, selectedLocation } = location.state || {};
-
   const navigate = useNavigate();
 
   // Keep existing fetch functions unchanged
@@ -1315,11 +1312,6 @@ const Form = () => {
       setActiveCategory(categories[0]);
     }
   }, [groupedSupportData, activeCategory]);
-
-  useEffect(() => {
-    console.log("Selected Location:", selectedLocation);
-    console.log("Active Travel:", activeTravel);
-  }, [selectedLocation, activeTravel]);
 
   // Handle checklist item selection
   const handleChecklistSelect = (itemId) => {
@@ -1458,8 +1450,8 @@ const Form = () => {
       // Prepare form data for first API call
       const formDataToSubmit = {
         EmployeeId: employeeId,
-        LocationId: selectedLocation?.locationId || 2,
-        FarmId: selectedLocation?.farmData?.FarmId || 1,
+        LocationId: locationDetails?.locationId,
+        FarmId: farmDetails?.farmId,
         remark: remark,
         categoryDetails: categoryDetails,
         checklistItems: selectedChecklistItems,
@@ -1598,7 +1590,7 @@ const Form = () => {
         checkoutLongitude: coords.longitude,
         checkoutTime: new Date().toISOString(),
         DocFormDetailId: formDetailId, // Use the formDetailId from form submission response
-        travelInfoId: activeTravel?.id, // Use the travel ID
+        // travelInfoId: ?.id, // Use the travel ID
       };
 
       console.log("Checkout data:", checkoutData);
@@ -1737,13 +1729,14 @@ const Form = () => {
 
                   {/* Remark section */}
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">
+                    <label className="block text-md font-medium text-gray-700">
                       Remark <span className="text-red-500">*</span>
+                      <span className="text-red-500 text-xs">required</span>
                     </label>
                     <textarea
                       rows={8}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all duration-200 text-sm min-h-24"
-                      placeholder="Enter your observations or notes for this HO visit"
+                      placeholder="Enter your observations or notes for this visit"
                       value={remark || ""}
                       onChange={(e) => setRemark(e.target.value)}
                     />
@@ -1988,12 +1981,13 @@ const Form = () => {
                   {/* Remark section */}
                   <div className="space-y-2">
                     <label className="block text-sm font-medium text-gray-700">
-                      Remark
+                      <span className="text-red-500">*</span>Remark{" "}
+                      <span className="text-red-500 text-xs">(required)</span>
                     </label>
                     <textarea
-                      rows={4}
+                      rows={8}
                       className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-all duration-200 text-sm min-h-24"
-                      placeholder={`Enter remark`}
+                      placeholder="Enter your observations or notes for this visit"
                       value={remark || ""}
                       onChange={(e) => setRemark(e.target.value)}
                     />

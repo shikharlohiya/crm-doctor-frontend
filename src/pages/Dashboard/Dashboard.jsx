@@ -20,7 +20,6 @@ const Dashboard = () => {
         const response = await axiosInstance.get(
           `/doctor/employee/${EmployeeId}/status`
         );
-        console.log(response.data);
 
         const { status } = response.data;
 

@@ -42,7 +42,6 @@ const Login = () => {
         EmployeeId,
         EmployeePassword,
       });
-      console.log(response);
       dispatch(setUser(response.data.employee));
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");
