@@ -1247,6 +1247,7 @@ const Form = () => {
   const [supportFormData, setSupportFormData] = useState({});
   const [images, setImages] = useState({});
   const [submitting, setSubmitting] = useState(false);
+  const [checkingOut, setCheckingOut] = useState(false);
   const [formDetailId, setFormDetailId] = useState(null);
   const [remark, setRemark] = useState("");
 
@@ -1254,7 +1255,7 @@ const Form = () => {
   const formStatus = useSelector((state) => state.session.formStatus);
   const sessionStatus = useSelector((state) => state.session.sessionStatus);
   const locationDetails = useSelector((state) => state.session.locationDetails);
-  const farmDetails = useSelector((state) => state.session.farmDetails);
+  // const farmDetails = useSelector((state) => state.session.farmDetails);
 
   console.log(sessionStatus);
   // const selectedFarm = localStorage.getItem("selectedFarm");
@@ -1262,13 +1263,23 @@ const Form = () => {
 
   // const selectedLocation = localStorage.getItem("selectedLocation");
   // const LocationId = selectedLocation ? JSON.parse(selectedLocation)?.LocationId ?? null : null;
-  const selectedFarm = localStorage.getItem("selectedFarm");
-  const FarmId = selectedFarm ? JSON.parse(selectedFarm)?.FarmId ?? null : null;
+  // const selectedFarm = localStorage.getItem("selectedFarm");
+  // const FarmId = selectedFarm ? JSON.parse(selectedFarm)?.FarmId ?? null : null;
 
-  const selectedLocation = localStorage.getItem("selectedLocation");
-  const LocationId = selectedLocation
-    ? JSON.parse(selectedLocation)?.LocationId ?? null
-    : null;
+  // const selectedLocation = localStorage.getItem("selectedLocation");
+  // const LocationId = selectedLocation
+  //   ? JSON.parse(selectedLocation)?.LocationId ?? null
+  //   : null;
+
+  const getLocation = localStorage.getItem("selectedLocation");
+  const selectedLocation = getLocation ? JSON.parse(getLocation) : null;
+  const LocationId = selectedLocation ? selectedLocation.LocationId : null;
+  const LocationName = selectedLocation ? selectedLocation.LocationName : null;
+
+  const getFarm = localStorage.getItem("selectedFarm");
+  const selectedFarm = getFarm ? JSON.parse(getFarm) : null;
+  const FarmId = selectedFarm ? selectedFarm.FarmId : null;
+  const FarmName = selectedFarm ? selectedFarm.farm.FarmName : null;
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -1643,7 +1654,7 @@ const Form = () => {
   // Handle checkout API call
   const handleCheckout = async () => {
     try {
-      setSubmitting(true);
+      setCheckingOut(true);
 
       // Get current location for checkout
       const coords = await getCurrentLocation();
@@ -1678,7 +1689,7 @@ const Form = () => {
       console.error("Checkout error:", err);
       toast.error(`Checkout failed: ${err.message}`);
     } finally {
-      setSubmitting(false);
+      setCheckingOut(false);
     }
   };
 
@@ -1745,8 +1756,9 @@ const Form = () => {
                 <div>
                   <p className="text-gray-600">Location</p>
                   <p className="font-medium text-gray-900 text-xs">
-                    {locationDetails ? locationDetails.locationName : "N/A"}
-                    {farmDetails && ` - ${farmDetails.farmName}`}
+                    {/* {locationDetails ? locationDetails.locationName : "N/A"}
+                    {farmDetails && ` - ${farmDetails.farmName}`} */}
+                    {LocationName}- {FarmName}
                   </p>
                 </div>
               </div>
@@ -2104,10 +2116,10 @@ const Form = () => {
                   <button
                     type="button"
                     onClick={handleCheckout}
-                    disabled={submitting}
+                    disabled={checkingOut}
                     className="flex-1 bg-gradient-to-r from-green-500 to-green-600 text-white font-poppins font-semibold py-3 px-4 rounded-lg hover:from-green-600 hover:to-green-700 transition-all disabled:opacity-50"
                   >
-                    {submitting ? (
+                    {checkingOut ? (
                       <div className="flex items-center justify-center">
                         <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-1"></div>
                         Checking out...
