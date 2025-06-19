@@ -38,8 +38,18 @@ const CheckInTravel = () => {
   const locationDetails = useSelector((state) => state.session.locationDetails);
   const farmDetails = useSelector((state) => state.session.farmDetails);
   const sessionStatus = useSelector((state) => state.session.sessionStatus);
-  const formStatus = useSelector((state) => state.session.formStatus);
-  console.log(formStatus);
+  // const formStatus = useSelector((state) => state.session.formStatus);
+  // console.log(formStatus);
+
+  const getLocation = localStorage.getItem("selectedLocation");
+  const selectedLocation = getLocation ? JSON.parse(getLocation) : null;
+  const LocationId = selectedLocation ? selectedLocation.LocationId : null;
+  const LocationName = selectedLocation ? selectedLocation.LocationName : null;
+
+  const getFarm = localStorage.getItem("selectedFarm");
+  const selectedFarm = getFarm ? JSON.parse(getFarm) : null;
+  const FarmId = selectedFarm ? selectedFarm.FarmId : null;
+  const FarmName = selectedFarm ? selectedFarm.farm.FarmName : null;
 
   // Get user's current location
   const getCurrentLocation = () => {
@@ -78,7 +88,7 @@ const CheckInTravel = () => {
         },
         {
           enableHighAccuracy: true,
-          timeout: 10000,
+          timeout: 30000,
           maximumAge: 60000,
         }
       );
@@ -128,6 +138,8 @@ const CheckInTravel = () => {
         checkinLatitude: coords.latitude,
         checkinLongitude: coords.longitude,
         checkinTime: new Date().toISOString(),
+        LocationId: LocationId,
+        FarmId: FarmId,
       };
 
       const response = await axiosInstance.post(`/doctor/checkin`, checkInData);
