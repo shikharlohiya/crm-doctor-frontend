@@ -1067,11 +1067,12 @@ class FormSubmissionService {
   }
 
   // Step 3: Complete form submission
-  async completeSubmission(formDetailId) {
+  async completeSubmission(formDetailId, employeeId) {
     const response = await axiosInstance.post(
       "/doctor/complete-form-submission",
       {
         formDetailId,
+        employeeId,
       },
       {
         headers: {
@@ -1108,12 +1109,19 @@ class BackgroundUploadService {
   }
 
   // Add upload job to queue
-  addUploadJob(formDetailId, imagesToUpload, onProgress, onComplete) {
+  addUploadJob(
+    formDetailId,
+    imagesToUpload,
+    employeeId,
+    onProgress,
+    onComplete
+  ) {
     const job = {
       id: Date.now(),
       formDetailId,
       imagesToUpload,
       onProgress,
+      employeeId,
       onComplete,
       status: "pending",
     };
@@ -1141,7 +1149,8 @@ class BackgroundUploadService {
 
   // Process individual upload job
   async processJob(job) {
-    const { formDetailId, imagesToUpload, onProgress, onComplete } = job;
+    const { formDetailId, imagesToUpload, employeeId, onProgress, onComplete } =
+      job;
 
     try {
       let completedCount = 0;
@@ -1192,7 +1201,7 @@ class BackgroundUploadService {
       // Complete submission if any images were uploaded successfully
       if (completedCount > 0) {
         try {
-          await this.formService.completeSubmission(formDetailId);
+          await this.formService.completeSubmission(formDetailId, employeeId);
           console.log(
             "Background upload: Form submission completed, email sent"
           );
@@ -1225,6 +1234,8 @@ class BackgroundUploadService {
 const backgroundUploadService = new BackgroundUploadService();
 
 const Form = () => {
+  const user = useSelector((state) => state.user.user);
+  const employeeId = user.EmployeeId;
   const [checklistData, setChecklistData] = useState([]);
   const [supportData, setSupportData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -1239,13 +1250,13 @@ const Form = () => {
   const [formDetailId, setFormDetailId] = useState(null);
   const [remark, setRemark] = useState("");
 
-  const user = useSelector((state) => state.user.user);
-  const employeeId = user.EmployeeId;
+  console.log(employeeId);
   const formStatus = useSelector((state) => state.session.formStatus);
   const sessionStatus = useSelector((state) => state.session.sessionStatus);
   const locationDetails = useSelector((state) => state.session.locationDetails);
   const farmDetails = useSelector((state) => state.session.farmDetails);
 
+  console.log(sessionStatus);
   // const selectedFarm = localStorage.getItem("selectedFarm");
   // const FarmId = selectedFarm ? JSON.parse(selectedFarm)?.FarmId ?? null : null;
 
@@ -1258,10 +1269,14 @@ const Form = () => {
   const LocationId = selectedLocation
     ? JSON.parse(selectedLocation)?.LocationId ?? null
     : null;
-  console.log(FarmId, LocationId);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  useEffect(() => {
+    if (sessionStatus !== "checked_in") {
+      navigate("/dashboard");
+    }
+  }, []);
 
   // Keep existing fetch functions unchanged
   const fetchChecklistData = async () => {
@@ -1526,6 +1541,7 @@ const Form = () => {
         backgroundUploadService.addUploadJob(
           newFormDetailId,
           imagesToUpload,
+          employeeId, // Pass employeeId to backgroundUploadService
           // Progress callback
           (progress) => {
             console.log("Background upload progress:", progress);
@@ -1546,9 +1562,22 @@ const Form = () => {
           }
         );
       } else {
-        // No images, just complete the submission
+        // No images, complete the submission immediately
         try {
-          await formService.completeSubmission(newFormDetailId);
+          console.log("Completing submission with:", {
+            formDetailId: newFormDetailId,
+            employeeId: employeeId, // Use the Redux employeeId directly
+          });
+
+          // Ensure employeeId is not null/undefined
+          // if (!employeeId) {
+          //   console.error("EmployeeId not found in Redux state");
+          //   toast.error("Employee ID not found. Please log in again.");
+          //   return;
+          // }
+
+          // Pass employeeId to completeSubmission
+          await formService.completeSubmission(newFormDetailId, employeeId);
         } catch (error) {
           console.error("Failed to complete submission:", error);
         }

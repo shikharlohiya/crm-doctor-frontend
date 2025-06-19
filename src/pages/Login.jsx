@@ -218,6 +218,8 @@ const Login = () => {
 
       // Set user in Redux store
       dispatch(setUser(response.data.employee));
+      console.log(response.data);
+      localStorage.setItem("EmployeeId", response.data.employee.EmployeeId);
 
       // After successful login, fetch session status
       await fetchSessionStatus(EmployeeId);
