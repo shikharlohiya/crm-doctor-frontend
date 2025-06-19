@@ -35,8 +35,8 @@ const CheckInTravel = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const locationDetails = useSelector((state) => state.session.locationDetails);
-  const farmDetails = useSelector((state) => state.session.farmDetails);
+  // const locationDetails = useSelector((state) => state.session.locationDetails);
+  // const farmDetails = useSelector((state) => state.session.farmDetails);
   const sessionStatus = useSelector((state) => state.session.sessionStatus);
   // const formStatus = useSelector((state) => state.session.formStatus);
   // console.log(formStatus);
@@ -229,9 +229,9 @@ const CheckInTravel = () => {
             <div>
               <p className="text-xs text-gray-600">Location</p>
               <p className="text-sm font-medium text-gray-900">
-                {/* {LocationName} */}
-                {locationDetails?.locationName}
-                {farmDetails && ` - ${farmDetails.farmName}`}
+                {LocationName}- {FarmName}
+                {/* {locationDetails?.locationName} */}
+                {/* {farmDetails && ` - ${farmDetails.farmName}`} */}
               </p>
             </div>
           </div>
