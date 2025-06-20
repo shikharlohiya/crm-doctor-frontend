@@ -13,8 +13,29 @@ import CheckInTravel from "./pages/Dashboard/CheckInTravel";
 import Form from "./pages/Dashboard/Form";
 import { useState, useEffect } from "react";
 
+import offlineSystemManager from "./utils/offlineInit";
+
 const App = () => {
   const [isMobile, setIsMobile] = useState(true);
+
+  useEffect(() => {
+    // Initialize offline system when app starts
+    const initOfflineSystem = async () => {
+      try {
+        await offlineSystemManager.initialize();
+        console.log("Offline system ready");
+      } catch (error) {
+        console.error("Failed to initialize offline system:", error);
+      }
+    };
+
+    initOfflineSystem();
+
+    // Cleanup on unmount
+    return () => {
+      offlineSystemManager.destroy();
+    };
+  }, []);
 
   useEffect(() => {
     const checkScreenSize = () => {
